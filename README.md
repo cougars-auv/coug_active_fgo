@@ -1,4 +1,4 @@
-# 🌊 CoUGARs Package Template
+# 🌊 CoUGARs Active Factor Graph Odometry
 
 [![ROS 2 CI](https://github.com/cougars-auv/coug_active_fgo/actions/workflows/ros2_ci.yml/badge.svg)](https://github.com/cougars-auv/coug_active_fgo/actions/workflows/ros2_ci.yml)
 [![Docker CI](https://github.com/cougars-auv/coug_active_fgo/actions/workflows/docker_ci.yml/badge.svg)](https://github.com/cougars-auv/coug_active_fgo/actions/workflows/docker_ci.yml)
