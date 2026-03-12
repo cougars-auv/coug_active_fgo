@@ -1,1 +1,4 @@
 /**:
+  waypoint_nav2_node:
+    ros__parameters:
+      waypoint_topic: "waypoints"
