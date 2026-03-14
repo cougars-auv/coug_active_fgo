@@ -41,7 +41,7 @@ WaypointNav2Node::WaypointNav2Node(const rclcpp::NodeOptions & options)
     "follow_waypoints");
 
   waypoint_sub_ = create_subscription<geometry_msgs::msg::PoseArray>(
-    params_.waypoint_topic, 10,
+    params_.waypoint_topic, rclcpp::SystemDefaultsQoS(),
     std::bind(&WaypointNav2Node::waypointCallback, this, std::placeholders::_1));
 
   RCLCPP_INFO(get_logger(), "Startup complete! Waiting for mission...");
