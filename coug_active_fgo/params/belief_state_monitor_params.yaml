@@ -1,0 +1,13 @@
+belief_state_monitor_node:
+  fgo_odom_topic:
+    type: string
+    default_value: "odometry/global"
+  fgo_vel_topic:
+    type: string
+    default_value: "factor_graph_node/velocity"
+  fgo_bias_topic:
+    type: string
+    default_value: "factor_graph_node/imu_bias"
+  norm_trace_topic:
+    type: string
+    default_value: "~/norm_trace"
