@@ -5,6 +5,10 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/cougars-auv/coug_active_fgo/main.svg)](https://results.pre-commit.ci/latest/github/cougars-auv/coug_active_fgo/main)
 [![codecov](https://codecov.io/gh/cougars-auv/coug_active_fgo/graph/badge.svg?token=92GLUNI35L)](https://codecov.io/gh/cougars-auv/coug_active_fgo)
 
+<p align="left">
+  <img src=".github/assets/rviz.gif" width="600">
+</p>
+
 ## 🚀 Get Started
 
 > **Prerequisites:** 64-bit Linux, free disk space (5+ GB recommended).
