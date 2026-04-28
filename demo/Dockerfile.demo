@@ -25,15 +25,15 @@ COPY dependencies.repos ${OVERLAY_WS}/src/dependencies.repos
 
 # Import dependencies and build
 WORKDIR ${OVERLAY_WS}
-RUN source /opt/ros/humble/setup.sh && \
+RUN source /opt/ros/${ROS_DISTRO}/setup.sh && \
   vcs import src < src/dependencies.repos
 
 RUN --mount=type=cache,target=${OVERLAY_WS}/build \
   --mount=type=cache,target=${OVERLAY_WS}/log \
-  source /opt/ros/humble/setup.sh && \
+  source /opt/ros/${ROS_DISTRO}/setup.sh && \
   colcon build --packages-select coug_active_fgo coug_description --cmake-args -DCMAKE_BUILD_TYPE=Release
 
-RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc \
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc \
   && echo "[ -f ${OVERLAY_WS}/install/setup.bash ] && source ${OVERLAY_WS}/install/setup.bash" >> /root/.bashrc
 
 ENTRYPOINT [ "/entrypoint.sh" ]
