@@ -96,12 +96,20 @@ def generate_launch_description() -> LaunchDescription:
                     {"use_sim_time": use_sim_time},
                 ],
             ),
+            Node(
+                package="twist_mux",
+                executable="twist_mux",
+                name="twist_mux",
+                parameters=[fleet_params, auv_params, {"use_sim_time": use_sim_time}],
+                remappings=[("cmd_vel_out", "cmd_vel")],
+            ),
             # --- Navigation2 Pipeline ---
             Node(
                 package="nav2_controller",
                 executable="controller_server",
                 name="controller_server",
                 parameters=[fleet_params, auv_params, {"use_sim_time": use_sim_time}],
+                remappings=[("cmd_vel", "nav2_cmd_vel")],
             ),
             Node(
                 package="nav2_planner",

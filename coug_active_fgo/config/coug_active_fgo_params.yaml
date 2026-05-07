@@ -115,6 +115,18 @@
           ahrs_update_rate: 50.0 # [Hz]
           yaw_noise_sigma: 0.01745 # [rad]
 
+  twist_mux:
+    ros__parameters:
+      topics:
+        nav2:
+          topic: nav2_cmd_vel
+          timeout: 0.5
+          priority: 10
+        joy:
+          topic: joy_cmd_vel
+          timeout: 0.5
+          priority: 20
+
   behavior_server:
     ros__parameters:
       cycle_frequency: 10.0
