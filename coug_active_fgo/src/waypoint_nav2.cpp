@@ -16,7 +16,7 @@
  * @file waypoint_nav2.cpp
  * @brief Implementation of the WaypointNav2Node.
  * @author Nelson Durrant
- * @date Mar 2026
+ * @date May 2026
  */
 
 #include "coug_active_fgo/waypoint_nav2.hpp"

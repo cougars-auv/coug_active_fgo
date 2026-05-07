@@ -16,7 +16,7 @@
  * @file belief_state_monitor.hpp
  * @brief ROS 2 node that publishes the normalized covariance trace for visualization.
  * @author Nelson Durrant
- * @date Mar 2026
+ * @date May 2026
  */
 
 #pragma once

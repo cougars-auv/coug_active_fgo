@@ -16,7 +16,7 @@
  * @file belief_state_critic.hpp
  * @brief MPPI critic plugin that penalizes state estimation uncertainty.
  * @author Nelson Durrant
- * @date Mar 2026
+ * @date May 2026
  */
 
 #pragma once

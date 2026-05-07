@@ -16,7 +16,7 @@
  * @file waypoint_nav2.hpp
  * @brief ROS 2 node for relaying waypoints to the Nav2 action server.
  * @author Nelson Durrant
- * @date Mar 2026
+ * @date May 2026
  */
 
 #pragma once
