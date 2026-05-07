@@ -30,12 +30,13 @@
       transform_tolerance: 2.0
       planner_plugins: ["GridBased"]
       GridBased:
-        plugin: "nav2_smac_planner/SmacPlanner2D"
+        plugin: "nav2_smac_planner::SmacPlanner2D"
         tolerance: 0.5
 
   controller_server:
     ros__parameters:
       controller_frequency: 10.0
+      enable_stamped_cmd_vel: true
       odom_topic: "odometry/local"
       progress_checker_plugin: "progress_checker"
       goal_checker_plugins: ["general_goal_checker"]
@@ -119,25 +120,26 @@
     ros__parameters:
       topics:
         nav2:
-          topic: nav2_cmd_vel
+          topic: cmd_vel
           timeout: 0.5
           priority: 10
         joy:
-          topic: joy_cmd_vel
+          topic: cmd_vel_joy
           timeout: 0.5
           priority: 20
 
   behavior_server:
     ros__parameters:
       cycle_frequency: 10.0
+      enable_stamped_cmd_vel: true
       transform_tolerance: 2.0
       behavior_plugins: ["spin", "backup", "wait"]
       spin:
-        plugin: "nav2_behaviors/Spin"
+        plugin: "nav2_behaviors::Spin"
       backup:
-        plugin: "nav2_behaviors/BackUp"
+        plugin: "nav2_behaviors::BackUp"
       wait:
-        plugin: "nav2_behaviors/Wait"
+        plugin: "nav2_behaviors::Wait"
 
   global_costmap:
     global_costmap:
