@@ -21,6 +21,7 @@ services:
     container_name: demo-ct
     environment:
       - DISPLAY=${DISPLAY}
+      - LIBGL_ALWAYS_SOFTWARE=1
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
