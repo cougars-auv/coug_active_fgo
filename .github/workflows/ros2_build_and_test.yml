@@ -58,7 +58,7 @@ jobs:
             'ubuntu-24.04' && '--coverage' || '' }}"
           AFTER_SETUP_UPSTREAM_WORKSPACE: |
             git config --global --add safe.directory "*"
-            vcs custom --git --args submodule update --init --recursive
+            vcs custom -n --git --args submodule update --init --recursive
       - if: matrix.runner == 'ubuntu-24.04'
         run: |
           sudo apt-get update && sudo apt-get install -y lcov
