@@ -1,0 +1,14 @@
+output_bags:
+  - uri: demo_ros2_bag
+    storage_id: mcap
+    topics:
+      - /tf
+      - /tf_static
+      - /blue0sim/robot_description
+      - /blue0sim/odometry/truth
+      - /blue0sim/odometry/global
+      - /blue0sim/smoothed_path
+      - /blue0sim/waypoints
+      - /blue0sim/belief_state_monitor_node/norm_trace
+      - /blue0sim/factor_graph_node/velocity
+      - /blue0sim/factor_graph_node/imu_bias

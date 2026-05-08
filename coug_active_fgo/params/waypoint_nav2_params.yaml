@@ -1,0 +1,4 @@
+waypoint_nav2_node:
+  waypoint_topic:
+    type: string
+    default_value: "waypoints"
