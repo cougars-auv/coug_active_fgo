@@ -101,21 +101,21 @@
             <plot flip_x="false" mode="TimeSeries" flip_y="false" line_width="1.0">
               <range bottom="-0.003079" left="25.941049" top="0.000075" right="30.956488" />
               <limitY />
-              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu_bias/twist/covariance[0]" />
+              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu/bias/twist/covariance[0]" />
             </plot>
           </DockArea>
           <DockArea name="...">
             <plot flip_x="false" mode="TimeSeries" flip_y="false" line_width="1.0">
               <range bottom="-0.004368" left="25.941049" top="0.000106" right="30.956488" />
               <limitY />
-              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu_bias/twist/covariance[7]" />
+              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu/bias/twist/covariance[7]" />
             </plot>
           </DockArea>
           <DockArea name="...">
             <plot flip_x="false" mode="TimeSeries" flip_y="false" line_width="1.0">
               <range bottom="-0.000036" left="25.941049" top="0.000584" right="30.956488" />
               <limitY />
-              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu_bias/twist/covariance[14]" />
+              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu/bias/twist/covariance[14]" />
             </plot>
           </DockArea>
         </DockSplitter>
@@ -128,21 +128,21 @@
             <plot flip_x="false" mode="TimeSeries" flip_y="false" line_width="1.0">
               <range bottom="-0.001693" left="25.941049" top="0.000041" right="30.956488" />
               <limitY />
-              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu_bias/twist/covariance[21]" />
+              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu/bias/twist/covariance[21]" />
             </plot>
           </DockArea>
           <DockArea name="...">
             <plot flip_x="false" mode="TimeSeries" flip_y="false" line_width="1.0">
               <range bottom="-0.000354" left="25.941049" top="0.000014" right="30.956488" />
               <limitY />
-              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu_bias/twist/covariance[28]" />
+              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu/bias/twist/covariance[28]" />
             </plot>
           </DockArea>
           <DockArea name="...">
             <plot flip_x="false" mode="TimeSeries" flip_y="false" line_width="1.0">
               <range bottom="-0.001157" left="25.941049" top="0.000028" right="30.956488" />
               <limitY />
-              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu_bias/twist/covariance[35]" />
+              <curve color="#00ff00" name="/AUV_NS/factor_graph_node/imu/bias/twist/covariance[35]" />
             </plot>
           </DockArea>
         </DockSplitter>
@@ -171,7 +171,7 @@
       <boolean_strings_to_number value="true" />
       <remove_suffix_from_strings value="true" />
       <selected_topics
-        value="/AUV_NS/factor_graph_node/imu_bias;/AUV_NS/factor_graph_node/velocity;/AUV_NS/odometry/global;/AUV_NS/belief_state_monitor_node/norm_trace" />
+        value="/AUV_NS/factor_graph_node/imu/bias;/AUV_NS/factor_graph_node/velocity;/AUV_NS/odometry/global;/AUV_NS/belief_state_monitor_node/norm_trace" />
     </plugin>
     <plugin ID="UDP Server" />
     <plugin ID="WebSocket Server" />

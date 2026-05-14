@@ -11,4 +11,4 @@ output_bags:
       - /blue0sim/waypoints
       - /blue0sim/belief_state_monitor_node/norm_trace
       - /blue0sim/factor_graph_node/velocity
-      - /blue0sim/factor_graph_node/imu_bias
+      - /blue0sim/factor_graph_node/imu/bias
