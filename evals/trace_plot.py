@@ -25,7 +25,7 @@ import yaml
 sns.reset_orig()
 plt.style.use(["science", "ieee"])
 
-AGENTS = ["coug0sim", "coug1sim", "coug2sim", "blue0sim", "bluerov2"]
+AGENTS = ["coug1sim", "coug2sim", "coug3sim", "blue1sim", "bluerov2"]
 COLORS = {"Belief State MPPI": "#4C72B0", "Standard MPPI": "#DD8452"}
 
 

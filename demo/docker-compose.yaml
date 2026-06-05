@@ -29,4 +29,4 @@ services:
     command: >
       ros2 launch coug_active_fgo demo.launch.py
       bag_path:=/demo_ros2_bag
-      auv_ns:=blue0sim
+      auv_ns:=blue1sim
