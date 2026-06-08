@@ -30,14 +30,14 @@ def generate_launch_description() -> LaunchDescription:
 
     fleet_params = PathJoinSubstitution(
         [
-            EnvironmentVariable("CONFIG_FOLDER"),
+            EnvironmentVariable("CONFIG_DIR"),
             "fleet",
             "coug_active_fgo_params.yaml",
         ]
     )
     auv_params = PathJoinSubstitution(
         [
-            EnvironmentVariable("CONFIG_FOLDER"),
+            EnvironmentVariable("CONFIG_DIR"),
             PythonExpression(["'", auv_ns, "' + '_params.yaml'"]),
         ]
     )
@@ -154,9 +154,11 @@ def generate_launch_description() -> LaunchDescription:
                 executable="lifecycle_manager",
                 name="lifecycle_manager_navigation",
                 parameters=[
-                    {"use_sim_time": use_sim_time},
-                    {"autostart": True},
-                    {"node_names": lifecycle_nodes},
+                    {
+                        "use_sim_time": use_sim_time,
+                        "autostart": True,
+                        "node_names": lifecycle_nodes,
+                    },
                 ],
             ),
         ]
