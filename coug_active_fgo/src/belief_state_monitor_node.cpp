@@ -24,9 +24,7 @@
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<coug_active_fgo::BeliefStateMonitorNode>(rclcpp::NodeOptions());
-  rclcpp::executors::MultiThreadedExecutor executor;
-  executor.add_node(node);
-  executor.spin();
+  rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;
 }

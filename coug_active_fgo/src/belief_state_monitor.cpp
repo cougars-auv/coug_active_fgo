@@ -46,9 +46,8 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
             pose_cov(i + 3, j) = c[i * 6 + (j + 3)];
           }
         }
-        std::lock_guard<std::mutex> lock(sigma_mutex_);
         Sigma_.block<6, 6>(0, 0) = pose_cov;
-        received_odom_.store(true);
+        received_odom_ = true;
         publishTrace();
       });
 
@@ -62,9 +61,8 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
             vel_cov(i, j) = c[i * 6 + j];
           }
         }
-        std::lock_guard<std::mutex> lock(sigma_mutex_);
         Sigma_.block<3, 3>(6, 6) = vel_cov;
-        received_vel_.store(true);
+        received_vel_ = true;
         publishTrace();
       });
 
@@ -78,9 +76,8 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
             bias_cov(i, j) = c[i * 6 + j];
           }
         }
-        std::lock_guard<std::mutex> lock(sigma_mutex_);
         Sigma_.block<6, 6>(9, 9) = bias_cov;
-        received_bias_.store(true);
+        received_bias_ = true;
         publishTrace();
       });
 
@@ -91,13 +88,13 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
 }
 
 void BeliefStateMonitorNode::publishTrace() {
-  if (!received_odom_.load() || !received_vel_.load() || !received_bias_.load()) {
+  if (!received_odom_ || !received_vel_ || !received_bias_) {
     return;
   }
 
-  if (!sigma0_set_.load()) {
+  if (!sigma0_set_) {
     Sigma0_bias_inv_ = Sigma_.block<6, 6>(9, 9).inverse();
-    sigma0_set_.store(true);
+    sigma0_set_ = true;
   }
 
   double trace = (Sigma0_bias_inv_ * Sigma_.block<6, 6>(9, 9)).trace();

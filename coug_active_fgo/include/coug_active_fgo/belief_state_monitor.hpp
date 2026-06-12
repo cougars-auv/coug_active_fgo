@@ -22,10 +22,8 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <atomic>
 #include <geometry_msgs/msg/twist_with_covariance_stamped.hpp>
 #include <memory>
-#include <mutex>
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/float64.hpp>
@@ -67,13 +65,12 @@ class BeliefStateMonitorNode : public rclcpp::Node {
   belief_state_monitor_node::Params params_;
 
   // --- State ---
-  mutable std::mutex sigma_mutex_;
   Eigen::Matrix<double, 15, 15> Sigma_{Eigen::Matrix<double, 15, 15>::Identity()};
   Eigen::Matrix<double, 6, 6> Sigma0_bias_inv_{Eigen::Matrix<double, 6, 6>::Identity()};
-  std::atomic<bool> received_odom_{false};
-  std::atomic<bool> received_vel_{false};
-  std::atomic<bool> received_bias_{false};
-  std::atomic<bool> sigma0_set_{false};
+  bool received_odom_{false};
+  bool received_vel_{false};
+  bool received_bias_{false};
+  bool sigma0_set_{false};
   double last_trace_{-1.0};
 };
 
