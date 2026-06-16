@@ -21,12 +21,12 @@ SHELL [ "/bin/bash", "-c" ]
 ENV OVERLAY_WS=/ros2_ws
 
 COPY coug_active_fgo ${OVERLAY_WS}/src/coug_active_fgo
-COPY dependencies.repos ${OVERLAY_WS}/src/dependencies.repos
+COPY demo/demo.repos ${OVERLAY_WS}/src/demo.repos
 
 # Import dependencies and build
 WORKDIR ${OVERLAY_WS}
 RUN source /opt/ros/${ROS_DISTRO}/setup.sh && \
-  vcs import src < src/dependencies.repos
+  vcs import src < src/demo.repos
 
 RUN --mount=type=cache,target=${OVERLAY_WS}/build \
   --mount=type=cache,target=${OVERLAY_WS}/log \

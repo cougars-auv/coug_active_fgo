@@ -28,5 +28,5 @@ services:
       - ./demo_ros2_bag:/demo_ros2_bag:ro
     command: >
       ros2 launch coug_active_fgo demo.launch.py
-      bag_path:=/demo_ros2_bag
+      play_bag_path:=/demo_ros2_bag
       auv_ns:=blue1sim

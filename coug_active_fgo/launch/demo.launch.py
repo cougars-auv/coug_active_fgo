@@ -33,9 +33,10 @@ def launch_setup(context, *args, **kwargs) -> list:
     use_sim_time = LaunchConfiguration("use_sim_time")
     start_delay = LaunchConfiguration("start_delay")
     auv_ns = LaunchConfiguration("auv_ns")
-    bag_path = LaunchConfiguration("bag_path")
+    play_bag_path = LaunchConfiguration("play_bag_path")
+    playback_rate = LaunchConfiguration("playback_rate")
 
-    bag_path_str = context.perform_substitution(bag_path)
+    play_bag_path_str = context.perform_substitution(play_bag_path)
     auv_ns_str = context.perform_substitution(auv_ns)
 
     coug_active_fgo_dir = get_package_share_directory("coug_active_fgo")
@@ -43,14 +44,16 @@ def launch_setup(context, *args, **kwargs) -> list:
 
     actions = []
 
-    if bag_path_str:
+    if play_bag_path_str:
         play_process = ExecuteProcess(
             cmd=[
                 "ros2",
                 "bag",
                 "play",
-                bag_path_str,
+                play_bag_path_str,
                 "--clock",
+                "--rate",
+                playback_rate,
                 "--start-offset",
                 start_delay,
                 "--topics",
@@ -117,9 +120,14 @@ def generate_launch_description() -> LaunchDescription:
                 description="Namespace for the AUV (e.g. auv0)",
             ),
             DeclareLaunchArgument(
-                "bag_path",
+                "play_bag_path",
                 default_value="",
-                description="Path to the rosbag to play (if empty, no bag is played)",
+                description="Path to play rosbag from",
+            ),
+            DeclareLaunchArgument(
+                "playback_rate",
+                default_value="1.0",
+                description="Bag playback rate multiplier (e.g. 0.5 for half speed, 2.0 for double)",
             ),
             OpaqueFunction(function=launch_setup),
         ]
