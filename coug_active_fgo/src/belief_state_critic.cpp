@@ -56,8 +56,8 @@ void BeliefStateCritic::initialize() {
   std::vector<double> velocity_noise_sigmas;
   double yaw_noise_sigma;
 
-  getParam(dvl_update_rate_, "dvl_update_rate", 10.0);
-  getParam(ahrs_update_rate_, "ahrs_update_rate", 50.0);
+  getParam(dvl_update_rate_hz_, "dvl_update_rate_hz", 10.0);
+  getParam(ahrs_update_rate_hz_, "ahrs_update_rate_hz", 50.0);
   getParam(velocity_noise_sigmas, "velocity_noise_sigmas", std::vector<double>{0.02, 0.02, 0.02});
   getParam(yaw_noise_sigma, "yaw_noise_sigma", 0.01745);
 
@@ -158,8 +158,8 @@ void BeliefStateCritic::score(CriticData& data) {
   Eigen::Matrix<double, 1, 15> H_ahrs = Eigen::Matrix<double, 1, 15>::Zero();
   H_ahrs(0, 2) = 1.0;
 
-  const double dvl_period = 1.0 / dvl_update_rate_;
-  const double ahrs_period = 1.0 / ahrs_update_rate_;
+  const double dvl_period = 1.0 / dvl_update_rate_hz_;
+  const double ahrs_period = 1.0 / ahrs_update_rate_hz_;
 
   // Iterate through each rollout in the batch
 #pragma omp parallel for schedule(static)

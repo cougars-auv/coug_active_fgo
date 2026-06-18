@@ -59,8 +59,8 @@ class BeliefStateCritic : public CriticFunction {
   // --- Parameters ---
   unsigned int power_{0};
   float weight_{0};
-  float dvl_update_rate_{0};
-  float ahrs_update_rate_{0};
+  float dvl_update_rate_hz_{0};
+  float ahrs_update_rate_hz_{0};
   Eigen::Matrix<double, 3, 3> R_dvl_;
   Eigen::Matrix<double, 1, 1> R_ahrs_;
   Eigen::Matrix<double, 3, 3> Q_gyro_cov_;
