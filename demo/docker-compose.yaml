@@ -17,7 +17,7 @@ services:
     build:
       context: ..
       dockerfile: demo/Dockerfile.demo
-    image: snelsondurrant/cougars:active-fgo-demo
+    image: frostlab/cougars:active-fgo-demo
     container_name: demo-ct
     environment:
       - DISPLAY=${DISPLAY}
