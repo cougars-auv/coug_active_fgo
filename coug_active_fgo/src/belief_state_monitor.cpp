@@ -84,7 +84,7 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
   trace_pub_ = create_publisher<std_msgs::msg::Float64>(params_.norm_trace_topic,
                                                         rclcpp::SystemDefaultsQoS());
 
-  RCLCPP_INFO(get_logger(), "Startup complete! Waiting for FGO messages...");
+  RCLCPP_INFO(get_logger(), "Startup complete! Waiting for FGO data...");
 }
 
 void BeliefStateMonitorNode::publishTrace() {

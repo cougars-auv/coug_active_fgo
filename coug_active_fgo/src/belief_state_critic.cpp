@@ -129,7 +129,7 @@ void BeliefStateCritic::score(CriticData& data) {
     return;
   }
   if (!received_odom_.load() || !received_vel_.load() || !received_bias_.load()) {
-    RCLCPP_WARN_THROTTLE(logger_, *clock_, 5000, "BeliefStateCritic waiting for FGO messages...");
+    RCLCPP_WARN_THROTTLE(logger_, *clock_, 5000, "BeliefStateCritic waiting for FGO data...");
     return;
   }
 
