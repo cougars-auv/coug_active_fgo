@@ -36,8 +36,8 @@ def launch_setup(context, *args, **kwargs) -> list:
     play_bag_path = LaunchConfiguration("play_bag_path")
     playback_rate = LaunchConfiguration("playback_rate")
 
-    play_bag_path_str = context.perform_substitution(play_bag_path)
-    auv_ns_str = context.perform_substitution(auv_ns)
+    play_bag_path_str = play_bag_path.perform(context)
+    auv_ns_str = auv_ns.perform(context)
 
     coug_active_fgo_dir = get_package_share_directory("coug_active_fgo")
     coug_active_fgo_launch_dir = os.path.join(coug_active_fgo_dir, "launch")
@@ -75,7 +75,7 @@ def launch_setup(context, *args, **kwargs) -> list:
             RegisterEventHandler(
                 event_handler=OnProcessExit(
                     target_action=play_process,
-                    on_exit=LogInfo(msg="Bag playback finished."),
+                    on_exit=[LogInfo(msg="Bag playback finished.")],
                 )
             )
         )
