@@ -50,7 +50,6 @@ class BeliefStateCritic : public CriticFunction {
 
   /**
    * @brief Evaluate cost related to state estimation uncertainty
-   *
    * @param costs [out] add covariance trace cost values to this tensor
    */
   void score(CriticData& data) override;
