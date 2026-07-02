@@ -29,7 +29,6 @@ from launch.substitutions import LaunchConfiguration
 
 
 def launch_setup(context, *args, **kwargs) -> list:
-
     use_sim_time = LaunchConfiguration("use_sim_time")
     start_delay = LaunchConfiguration("start_delay")
     auv_ns = LaunchConfiguration("auv_ns")
