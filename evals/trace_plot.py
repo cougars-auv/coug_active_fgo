@@ -29,20 +29,36 @@ AGENTS = ["coug1sim", "coug2sim", "coug3sim", "blue1sim", "bluerov2"]
 COLORS = {"Belief State MPPI": "#4C72B0", "Standard MPPI": "#DD8452"}
 
 
-def is_critic_enabled(bag_path: Path) -> bool:
-    config_path = bag_path / "config" / "fleet" / "coug_active_fgo_params.yaml"
-    if not config_path.exists():
-        return False
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
-    try:
-        controller = config["/**"]["controller_server"]["ros__parameters"]["FollowPath"]
-        return controller.get("BeliefStateCritic", {}).get("enabled", False)
-    except (KeyError, TypeError):
-        return False
+def is_critic_enabled(bag_path: Path, agent_name: str) -> bool:
+    config_paths = [
+        bag_path / "config" / "fleet" / "coug_active_fgo_params.yaml",
+        bag_path / "config" / f"{agent_name}_params.yaml",
+    ]
+
+    enabled = False
+    for path in config_paths:
+        try:
+            with open(path) as f:
+                config = yaml.safe_load(f)
+            try:
+                enabled = config["/**"]["controller_server"]["ros__parameters"][
+                    "FollowPath"
+                ]["BeliefStateCritic"]["enabled"]
+            except (KeyError, TypeError):
+                pass
+            try:
+                enabled = config[f"/{agent_name}"]["controller_server"][
+                    "ros__parameters"
+                ]["FollowPath"]["BeliefStateCritic"]["enabled"]
+            except (KeyError, TypeError):
+                pass
+        except (OSError, yaml.YAMLError):
+            continue
+
+    return bool(enabled)
 
 
-def load_trace(bag_path: Path, agent: str) -> tuple[list[float], list[float]] | None:
+def load_data(bag_path: Path, agent: str) -> tuple[list[float], list[float]] | None:
     topic = f"/{agent}/belief_state_monitor_node/norm_trace"
     try:
         with AnyReader([bag_path]) as reader:
@@ -65,35 +81,37 @@ def load_trace(bag_path: Path, agent: str) -> tuple[list[float], list[float]] | 
         return None
 
 
-def plot_traces(target_dir: Path, output_path: Path) -> None:
+def generate_plots(target_dir: Path, output_path: Path) -> None:
     bag_paths = [p.parent for p in target_dir.rglob("metadata.yaml")]
 
     fig, ax = plt.subplots()
-    active_plotted, baseline_plotted = False, False
+    plotted_labels = set()
 
     for bag_path in sorted(bag_paths):
-        enabled = is_critic_enabled(bag_path)
-        label_key = "Belief State MPPI" if enabled else "Standard MPPI"
-        color = COLORS[label_key]
-
         for agent in AGENTS:
-            result = load_trace(bag_path, agent)
-            if result is None:
+            if not (result := load_data(bag_path, agent)):
                 continue
             times, values = result
 
-            label = None
-            if enabled and not active_plotted:
-                label = label_key
-                active_plotted = True
-            elif not enabled and not baseline_plotted:
-                label = label_key
-                baseline_plotted = True
+            enabled = is_critic_enabled(bag_path, agent)
+            label_key = "Belief State MPPI" if enabled else "Standard MPPI"
 
-            ax.plot(times, values, color=color, linestyle="-", alpha=0.8, label=label)
+            label = None
+            if label_key not in plotted_labels:
+                label = label_key
+                plotted_labels.add(label_key)
+
+            ax.plot(
+                times,
+                values,
+                color=COLORS[label_key],
+                linestyle="-",
+                alpha=0.8,
+                label=label,
+            )
 
     ax.set(title="", xlabel="Time (s)", ylabel="Normalized Bias Trace")
-    if active_plotted or baseline_plotted:
+    if plotted_labels:
         ax.legend()
 
     fig.savefig(str(output_path), dpi=300, bbox_inches="tight")
@@ -110,7 +128,7 @@ def main() -> None:
         print(f"Error: {target_dir} does not exist.")
         return
 
-    plot_traces(target_dir, target_dir / "norm_trace.png")
+    generate_plots(target_dir, target_dir / "norm_trace.png")
     print(f"Plots saved to {target_dir}")
 
 
