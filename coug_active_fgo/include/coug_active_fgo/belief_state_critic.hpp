@@ -39,18 +39,18 @@ namespace mppi::critics {
  * @brief Critic objective function for uncertainty-aware AUV navigation.
  *
  * This plugin propagates a 15-state EKF covariance along each trajectory rollout. It penalizes
- * trajectories based on the normalized trace of the final covariance.
+ * trajectories based on the normalized trace of the final IMU-bias covariance block.
  */
 class BeliefStateCritic : public CriticFunction {
  public:
   /**
-   * @brief Initialize critic
+   * @brief Loads parameters and subscribes to the FGO estimate topics.
    */
   void initialize() override;
 
   /**
-   * @brief Evaluate cost related to state estimation uncertainty
-   * @param costs [out] add covariance trace cost values to this tensor
+   * @brief Adds an uncertainty cost to each rollout by propagating the belief covariance.
+   * @param data The MPPI critic data; covariance trace costs are added to data.costs.
    */
   void score(CriticData& data) override;
 

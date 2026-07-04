@@ -47,7 +47,7 @@ class WaypointNav2Node : public rclcpp::Node {
   using GoalHandleFollowWaypoints = rclcpp_action::ClientGoalHandle<FollowWaypoints>;
 
   /**
-   * @brief WaypointNav2Node constructor.
+   * @brief Constructs the node and sets up the Nav2 action client.
    * @param options The node options.
    */
   explicit WaypointNav2Node(const rclcpp::NodeOptions& options);
@@ -55,13 +55,13 @@ class WaypointNav2Node : public rclcpp::Node {
  protected:
   // --- Logic ---
   /**
-   * @brief Callback for receiving a new list of waypoints.
+   * @brief Forwards the waypoints to Nav2, or cancels all goals if the list is empty.
    * @param msg The incoming PoseArray message containing waypoints.
    */
   void waypointCallback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
 
   /**
-   * @brief Callback for handling the completion status from Nav2.
+   * @brief Logs the mission outcome reported by Nav2.
    * @param result The result from the action server.
    */
   void resultCallback(const GoalHandleFollowWaypoints::WrappedResult& result);

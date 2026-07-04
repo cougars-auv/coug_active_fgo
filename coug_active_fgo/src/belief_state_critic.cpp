@@ -66,7 +66,7 @@ void BeliefStateCritic::initialize() {
 
   getParam(fgo_odom_topic_, "fgo_odom_topic", std::string("odometry/global"));
   getParam(fgo_vel_topic_, "fgo_vel_topic", std::string("factor_graph_node/velocity"));
-  getParam(fgo_bias_topic_, "fgo_bias_topic", std::string("factor_graph_node/imu_bias"));
+  getParam(fgo_bias_topic_, "fgo_bias_topic", std::string("factor_graph_node/imu/bias"));
 
   auto node = parent_.lock();
   clock_ = node->get_clock();
@@ -216,7 +216,7 @@ void BeliefStateCritic::score(CriticData& data) {
         H_dvl.block<3, 3>(0, 6) << cpsi, spsi, 0.0, -spsi, cpsi, 0.0, 0.0, 0.0, 1.0;
 
         // K = Σ_i * H^T * (H * Σ_i * H^T + R)^-1
-        auto K =
+        const Eigen::Matrix<double, 15, 3> K =
             Sigma_i * H_dvl.transpose() * (H_dvl * Sigma_i * H_dvl.transpose() + R_dvl_).inverse();
 
         // Σ_i = (I - K*H) * Σ_i
@@ -226,8 +226,9 @@ void BeliefStateCritic::score(CriticData& data) {
 
       if (trigger_ahrs) {
         // K = Σ_i * H^T * (H * Σ_i * H^T + R)^-1
-        auto K = Sigma_i * H_ahrs.transpose() *
-                 (H_ahrs * Sigma_i * H_ahrs.transpose() + R_ahrs_).inverse();
+        const Eigen::Matrix<double, 15, 1> K =
+            Sigma_i * H_ahrs.transpose() *
+            (H_ahrs * Sigma_i * H_ahrs.transpose() + R_ahrs_).inverse();
 
         // Σ_i = (I - K*H) * Σ_i
         Sigma_i = (I_15 - K * H_ahrs) * Sigma_i;
