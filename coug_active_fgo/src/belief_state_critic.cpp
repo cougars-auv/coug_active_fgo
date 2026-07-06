@@ -121,7 +121,7 @@ void BeliefStateCritic::initialize() {
         received_bias_.store(true);
       });
 
-  RCLCPP_INFO(get_logger(), "Initialization complete.");
+  RCLCPP_INFO(logger_, "Initialization complete.");
 }
 
 void BeliefStateCritic::score(CriticData& data) {
