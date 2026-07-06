@@ -121,7 +121,7 @@ void BeliefStateCritic::initialize() {
         received_bias_.store(true);
       });
 
-  RCLCPP_INFO(logger_, "BeliefStateCritic initialized.");
+  RCLCPP_INFO(get_logger(), "Initialization complete.");
 }
 
 void BeliefStateCritic::score(CriticData& data) {
@@ -129,7 +129,6 @@ void BeliefStateCritic::score(CriticData& data) {
     return;
   }
   if (!received_odom_.load() || !received_vel_.load() || !received_bias_.load()) {
-    RCLCPP_WARN_THROTTLE(logger_, *clock_, 5000, "BeliefStateCritic waiting for FGO data...");
     return;
   }
 

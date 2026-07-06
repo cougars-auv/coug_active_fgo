@@ -27,8 +27,6 @@ namespace coug_active_fgo {
 
 BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& options)
     : Node("belief_state_monitor_node", options) {
-  RCLCPP_INFO(get_logger(), "Starting Belief State Monitor Node...");
-
   param_listener_ =
       std::make_shared<belief_state_monitor_node::ParamListener>(get_node_parameters_interface());
   params_ = param_listener_->get_params();
@@ -84,7 +82,7 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
   trace_pub_ = create_publisher<std_msgs::msg::Float64>(params_.norm_trace_topic,
                                                         rclcpp::SystemDefaultsQoS());
 
-  RCLCPP_INFO(get_logger(), "Startup complete! Waiting for FGO data...");
+  RCLCPP_INFO(get_logger(), "Initialization complete.");
 }
 
 void BeliefStateMonitorNode::publishTrace() {

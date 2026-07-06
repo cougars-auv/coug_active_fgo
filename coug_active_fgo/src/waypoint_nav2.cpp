@@ -27,8 +27,6 @@ namespace coug_active_fgo {
 
 WaypointNav2Node::WaypointNav2Node(const rclcpp::NodeOptions& options)
     : Node("waypoint_nav2_node", options) {
-  RCLCPP_INFO(get_logger(), "Starting Waypoint Nav2 Node...");
-
   param_listener_ =
       std::make_shared<waypoint_nav2_node::ParamListener>(get_node_parameters_interface());
   params_ = param_listener_->get_params();
@@ -40,12 +38,12 @@ WaypointNav2Node::WaypointNav2Node(const rclcpp::NodeOptions& options)
       params_.waypoint_topic, rclcpp::SystemDefaultsQoS(),
       std::bind(&WaypointNav2Node::waypointCallback, this, std::placeholders::_1));
 
-  RCLCPP_INFO(get_logger(), "Startup complete! Waiting for mission...");
+  RCLCPP_INFO(get_logger(), "Initialization complete.");
 }
 
 void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
   if (msg->poses.empty()) {
-    RCLCPP_WARN(get_logger(), "Received empty mission. Canceling mission...");
+    RCLCPP_WARN(get_logger(), "Received empty waypoints. Canceling mission.");
     nav2_client_->async_cancel_all_goals();
     return;
   }
@@ -68,25 +66,25 @@ void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::Sha
     goal_msg.poses.push_back(pose_stamped);
   }
 
-  RCLCPP_INFO(get_logger(), "Sending goal with %zu waypoints to Nav2...", goal_msg.poses.size());
-
   auto send_goal_options = rclcpp_action::Client<FollowWaypoints>::SendGoalOptions();
   send_goal_options.result_callback =
       std::bind(&WaypointNav2Node::resultCallback, this, std::placeholders::_1);
 
   nav2_client_->async_send_goal(goal_msg, send_goal_options);
+
+  RCLCPP_INFO(get_logger(), "Sent goal with %zu waypoints to Nav2.", goal_msg.poses.size());
 }
 
 void WaypointNav2Node::resultCallback(const GoalHandleFollowWaypoints::WrappedResult& result) {
   switch (result.code) {
     case rclcpp_action::ResultCode::SUCCEEDED:
-      RCLCPP_INFO(get_logger(), "Nav2 successfully reached all waypoints!");
+      RCLCPP_INFO(get_logger(), "Nav2 completed the mission.");
       break;
     case rclcpp_action::ResultCode::ABORTED:
       RCLCPP_ERROR(get_logger(), "Nav2 aborted the mission.");
       break;
     case rclcpp_action::ResultCode::CANCELED:
-      RCLCPP_WARN(get_logger(), "Nav2 mission was canceled.");
+      RCLCPP_WARN(get_logger(), "Nav2 canceled the mission.");
       break;
     default:
       RCLCPP_ERROR(get_logger(), "Unknown result code from Nav2.");
