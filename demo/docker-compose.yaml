@@ -18,7 +18,7 @@ services:
       context: ..
       dockerfile: demo/Dockerfile.demo
     image: frostlab/cougars:active-fgo-demo
-    container_name: demo-ct
+    container_name: active-fgo-demo-ct
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_SOFTWARE=1

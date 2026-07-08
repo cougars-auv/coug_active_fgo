@@ -62,7 +62,7 @@ def launch_setup(context, *args, **kwargs) -> list:
                 f"/{auv_ns_str}/odometry/truth",
                 f"/{auv_ns_str}/odometry/global",
                 f"/{auv_ns_str}/smoothed_path",
-                f"/{auv_ns_str}/waypoints",
+                f"/{auv_ns_str}/waypoints_map",
                 f"/{auv_ns_str}/belief_state_monitor_node/norm_trace",
                 f"/{auv_ns_str}/factor_graph_node/velocity",
                 f"/{auv_ns_str}/factor_graph_node/imu/bias",
