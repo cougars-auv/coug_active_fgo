@@ -35,9 +35,6 @@ namespace coug_active_fgo {
 /**
  * @class BeliefStateMonitorNode
  * @brief ROS 2 node that publishes the normalized covariance trace for visualization.
- *
- * This node assembles the FGO covariance estimates and publishes the trace of the IMU-bias
- * block, normalized by its value at the first complete update (matching BeliefStateCritic).
  */
 class BeliefStateMonitorNode : public rclcpp::Node {
  public:

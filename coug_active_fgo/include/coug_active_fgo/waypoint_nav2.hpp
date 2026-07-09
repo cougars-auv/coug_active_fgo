@@ -37,9 +37,6 @@ namespace coug_active_fgo {
 /**
  * @class WaypointNav2Node
  * @brief ROS 2 node for relaying waypoints to the Nav2 action server.
- *
- * This node listens for a list of waypoints and forwards them to
- * the Nav2 FollowWaypoints action server.
  */
 class WaypointNav2Node : public rclcpp::Node {
  public:
