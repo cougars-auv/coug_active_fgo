@@ -16,7 +16,7 @@
  * @file belief_state_critic.cpp
  * @brief Implementation of the BeliefStateCritic.
  * @author Nelson Durrant
- * @date May 2026
+ * @date April 2026
  */
 
 #include "coug_active_fgo/belief_state_critic.hpp"

@@ -16,7 +16,7 @@
  * @file belief_state_monitor.cpp
  * @brief Implementation of the BeliefStateMonitorNode.
  * @author Nelson Durrant
- * @date May 2026
+ * @date April 2026
  */
 
 #include "coug_active_fgo/belief_state_monitor.hpp"
