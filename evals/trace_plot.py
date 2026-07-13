@@ -29,7 +29,7 @@ AGENTS = ["coug1sim", "coug2sim", "coug3sim", "blue1sim", "bluerov2"]
 COLORS = {"Belief State MPPI": "#4C72B0", "Standard MPPI": "#DD8452"}
 
 
-def is_critic_enabled(bag_path: Path, agent_name: str) -> bool:
+def _is_critic_enabled(bag_path: Path, agent_name: str) -> bool:
     """
     Read whether the belief state critic was enabled from a bag's config.
 
@@ -65,7 +65,7 @@ def is_critic_enabled(bag_path: Path, agent_name: str) -> bool:
     return bool(enabled)
 
 
-def read_norm_trace(
+def _read_norm_trace(
     bag_path: Path, agent: str
 ) -> tuple[list[float], list[float]] | None:
     """
@@ -93,11 +93,11 @@ def read_norm_trace(
             t0 = times[0]
             return [t - t0 for t in times], values
     except Exception as e:
-        print(f"Error reading {bag_path}: {e}")
+        print(f"Could not read {bag_path}: {e}")
         return None
 
 
-def render(target_dir: Path) -> None:
+def _render(target_dir: Path) -> None:
     """
     Save an overlaid normalized bias trace plot across all bags.
 
@@ -110,11 +110,11 @@ def render(target_dir: Path) -> None:
 
     for bag_path in sorted(bag_paths):
         for agent in AGENTS:
-            if not (result := read_norm_trace(bag_path, agent)):
+            if not (result := _read_norm_trace(bag_path, agent)):
                 continue
             times, values = result
 
-            enabled = is_critic_enabled(bag_path, agent)
+            enabled = _is_critic_enabled(bag_path, agent)
             label_key = "Belief State MPPI" if enabled else "Standard MPPI"
 
             label = None
@@ -146,10 +146,10 @@ def main() -> None:
 
     target_dir = Path(sys.argv[1])
     if not target_dir.exists():
-        print(f"Error: {target_dir} does not exist.")
+        print(f"{target_dir} does not exist.")
         return
 
-    render(target_dir)
+    _render(target_dir)
     print(f"Plots saved to {target_dir}")
 
 
