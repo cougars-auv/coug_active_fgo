@@ -23,4 +23,4 @@ else
 fi
 
 # --- Plots ---
-python3 $(dirname "$0")/trace_plot.py "${target_dir}"
+python3 "$(dirname "$0")/trace_plot.py" "${target_dir}"
