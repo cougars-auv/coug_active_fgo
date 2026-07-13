@@ -93,7 +93,7 @@ def _read_norm_trace(
             t0 = times[0]
             return [t - t0 for t in times], values
     except Exception as e:
-        print(f"Could not read {bag_path}: {e}")
+        print(f"WARNING: Could not read {bag_path}: {e}")
         return None
 
 
@@ -103,6 +103,7 @@ def _render(target_dir: Path) -> None:
 
     :param target_dir: Directory tree containing the bags to plot.
     """
+    print("Rendering trace plots...")
     bag_paths = [p.parent for p in target_dir.rglob("metadata.yaml")]
 
     fig, ax = plt.subplots()
@@ -135,8 +136,10 @@ def _render(target_dir: Path) -> None:
     if plotted_labels:
         ax.legend()
 
-    fig.savefig(target_dir / "norm_trace.png", dpi=300, bbox_inches="tight")
+    out_path = target_dir / "norm_trace.png"
+    fig.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
+    print(f"Saved plot: {out_path}")
 
 
 def main() -> None:
@@ -150,7 +153,6 @@ def main() -> None:
         return
 
     _render(target_dir)
-    print(f"Plots saved to {target_dir}")
 
 
 if __name__ == "__main__":
