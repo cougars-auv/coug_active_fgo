@@ -105,6 +105,9 @@ def _render(target_dir: Path) -> None:
     """
     print("Rendering trace plots...")
     bag_paths = [p.parent for p in target_dir.rglob("metadata.yaml")]
+    if not bag_paths:
+        print(f"No bags found in {target_dir}")
+        return
 
     fig, ax = plt.subplots()
     plotted_labels = set()
@@ -150,9 +153,6 @@ def main() -> None:
         help="A bag directory or a directory of bags to plot",
     )
     args = parser.parse_args()
-
-    if not args.target_dir.exists():
-        parser.error(f"{args.target_dir} does not exist.")
 
     _render(args.target_dir)
 
