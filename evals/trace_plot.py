@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -93,7 +93,7 @@ def _read_norm_trace(
             t0 = times[0]
             return [t - t0 for t in times], values
     except Exception as e:
-        print(f"WARNING: Could not read {bag_path}: {e}")
+        print(f"Could not read {bag_path}: {e}")
         return None
 
 
@@ -143,16 +143,18 @@ def _render(target_dir: Path) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) < 2:
-        print("Usage: trace_plot.py <target_dir>")
-        return
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "target_dir",
+        type=Path,
+        help="A bag directory or a directory of bags to plot",
+    )
+    args = parser.parse_args()
 
-    target_dir = Path(sys.argv[1])
-    if not target_dir.exists():
-        print(f"{target_dir} does not exist.")
-        return
+    if not args.target_dir.exists():
+        parser.error(f"{args.target_dir} does not exist.")
 
-    _render(target_dir)
+    _render(args.target_dir)
 
 
 if __name__ == "__main__":
