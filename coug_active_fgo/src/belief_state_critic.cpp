@@ -179,7 +179,7 @@ void BeliefStateCritic::score(CriticData& data) {
       Eigen::Matrix3d Rz;
       Rz << cpsi, -spsi, 0, spsi, cpsi, 0, 0, 0, 1;
 
-      // Estimate map frame acceleration
+      // Estimate map-frame acceleration
       Eigen::Vector3d a_map = Eigen::Vector3d::Zero();
       if (t + 1 < time_steps) {
         const double psi_n = static_cast<double>(data.trajectories.yaws(i, t + 1));
@@ -210,7 +210,7 @@ void BeliefStateCritic::score(CriticData& data) {
       const bool trigger_ahrs = (curr_sim_time - t_last_ahrs) >= ahrs_period;
 
       if (trigger_dvl) {
-        // Maps map frame velocity to base frame DVL measurements
+        // Maps map-frame velocity to base-frame DVL measurements
         Eigen::Matrix<double, 3, 15> H_dvl = Eigen::Matrix<double, 3, 15>::Zero();
         H_dvl.block<3, 3>(0, 6) << cpsi, spsi, 0.0, -spsi, cpsi, 0.0, 0.0, 0.0, 1.0;
 
