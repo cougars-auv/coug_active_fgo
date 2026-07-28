@@ -3,7 +3,7 @@
 <package format="3">
   <name>coug_active_fgo</name>
   <version>0.0.0</version>
-  <description>CoUGARs Nav2 plugins for belief-state MPPI control.</description>
+  <description>Nav2 plugins for belief-state MPPI control.</description>
   <maintainer email="snelsond@byu.edu">snelsondurrant</maintainer>
   <license>Apache-2.0</license>
   <url type="repository">https://github.com/cougars-auv/coug_active_fgo</url>
