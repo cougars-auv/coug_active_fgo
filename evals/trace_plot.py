@@ -92,7 +92,7 @@ def _read_norm_trace(
                 return None
             t0 = times[0]
             return [t - t0 for t in times], values
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Could not read {bag_path}: {e}")
         return None
 
