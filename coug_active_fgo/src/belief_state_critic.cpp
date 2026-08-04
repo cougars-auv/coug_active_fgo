@@ -46,7 +46,7 @@ void BeliefStateCritic::initialize() {
            std::vector<double>{0.000105, 0.000105, 0.000105});
   getParam(gyro_bias_rw_sigmas, "gyro_bias_rw_sigmas",
            std::vector<double>{0.0000391, 0.0000391, 0.0000391});
-  getParam(integration_covariance_, "integration_covariance", 0.00001);
+  getParam(integration_covariance_, "integration_covariance", 1.0e-8);
 
   Q_gyro_cov_ = toDiagCov(gyro_noise_sigmas);
   Q_accel_cov_ = toDiagCov(accel_noise_sigmas);
