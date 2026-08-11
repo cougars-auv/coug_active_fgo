@@ -44,7 +44,7 @@ class BeliefStateMonitorNode : public rclcpp::Node {
    */
   explicit BeliefStateMonitorNode(const rclcpp::NodeOptions& options);
 
- protected:
+ private:
   // --- Logic ---
   /**
    * @brief Publishes the normalized IMU-bias covariance trace once all inputs have arrived.

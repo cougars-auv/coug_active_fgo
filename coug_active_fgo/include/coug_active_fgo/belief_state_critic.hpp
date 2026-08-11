@@ -54,7 +54,7 @@ class BeliefStateCritic : public CriticFunction {
    */
   void score(CriticData& data) override;
 
- protected:
+ private:
   // --- Parameters ---
   unsigned int power_{0};
   float weight_{0};

@@ -49,7 +49,7 @@ class WaypointNav2Node : public rclcpp::Node {
    */
   explicit WaypointNav2Node(const rclcpp::NodeOptions& options);
 
- protected:
+ private:
   // --- Logic ---
   /**
    * @brief Forwards the waypoints to Nav2, or cancels all goals if the list is empty.
