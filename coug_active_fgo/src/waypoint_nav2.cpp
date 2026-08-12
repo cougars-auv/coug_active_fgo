@@ -48,7 +48,8 @@ void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::Sha
     return;
   }
 
-  if (!nav2_client_->wait_for_action_server(std::chrono::seconds(5))) {
+  static constexpr std::chrono::seconds kActionServerTimeout{5};
+  if (!nav2_client_->wait_for_action_server(kActionServerTimeout)) {
     RCLCPP_ERROR(get_logger(), "Nav2 FollowWaypoints action server not available.");
     return;
   }
