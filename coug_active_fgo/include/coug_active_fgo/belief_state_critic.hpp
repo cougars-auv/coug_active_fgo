@@ -37,9 +37,6 @@ namespace mppi::critics {
 /**
  * @class mppi::critics::BeliefStateCritic
  * @brief MPPI critic plugin that penalizes state estimation uncertainty.
- *
- * This plugin propagates a 15-state EKF covariance along each trajectory rollout. It penalizes
- * trajectories based on the normalized trace of the final IMU-bias covariance block.
  */
 class BeliefStateCritic : public CriticFunction {
  public:
@@ -49,7 +46,7 @@ class BeliefStateCritic : public CriticFunction {
   void initialize() override;
 
   /**
-   * @brief Adds an uncertainty cost to each rollout by propagating the belief covariance.
+   * @brief Adds an uncertainty cost to each rollout by propagating the EKF covariance.
    * @param data The MPPI critic data; covariance trace costs are added to data.costs.
    */
   void score(CriticData& data) override;

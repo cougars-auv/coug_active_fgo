@@ -40,12 +40,11 @@ void BeliefStateCritic::initialize() {
   std::vector<double> accel_noise_sigmas, gyro_noise_sigmas;
   std::vector<double> accel_bias_rw_sigmas, gyro_bias_rw_sigmas;
 
-  getParam(accel_noise_sigmas, "accel_noise_sigmas", std::vector<double>{0.0078, 0.0078, 0.0078});
-  getParam(gyro_noise_sigmas, "gyro_noise_sigmas", std::vector<double>{0.0012, 0.0012, 0.0012});
+  getParam(accel_noise_sigmas, "accel_noise_sigmas", std::vector<double>{5.6e-4, 5.6e-4, 5.6e-4});
+  getParam(gyro_noise_sigmas, "gyro_noise_sigmas", std::vector<double>{5.24e-5, 5.24e-5, 5.24e-5});
   getParam(accel_bias_rw_sigmas, "accel_bias_rw_sigmas",
-           std::vector<double>{0.000105, 0.000105, 0.000105});
-  getParam(gyro_bias_rw_sigmas, "gyro_bias_rw_sigmas",
-           std::vector<double>{0.0000391, 0.0000391, 0.0000391});
+           std::vector<double>{1.4e-5, 1.4e-5, 1.4e-5});
+  getParam(gyro_bias_rw_sigmas, "gyro_bias_rw_sigmas", std::vector<double>{3.5e-6, 3.5e-6, 3.5e-6});
   getParam(integration_covariance_, "integration_covariance", 1.0e-8);
 
   Q_gyro_cov_ = toDiagCov(gyro_noise_sigmas);
@@ -57,7 +56,7 @@ void BeliefStateCritic::initialize() {
   double yaw_noise_sigma;
 
   getParam(dvl_update_rate_hz_, "dvl_update_rate_hz", 10.0);
-  getParam(ahrs_update_rate_hz_, "ahrs_update_rate_hz", 50.0);
+  getParam(ahrs_update_rate_hz_, "ahrs_update_rate_hz", 10.0);
   getParam(velocity_noise_sigmas, "velocity_noise_sigmas", std::vector<double>{0.02, 0.02, 0.02});
   getParam(yaw_noise_sigma, "yaw_noise_sigma", 0.01745);
 
