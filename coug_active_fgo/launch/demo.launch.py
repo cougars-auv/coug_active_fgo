@@ -13,9 +13,11 @@
 # limitations under the License.
 
 import os
+from typing import Any
 
 from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
+from launch import LaunchContext, LaunchDescription
+from launch.action import Action
 from launch.actions import (
     DeclareLaunchArgument,
     ExecuteProcess,
@@ -29,7 +31,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
 
-def launch_setup(context, *args, **kwargs) -> list:
+def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Action]:
     use_sim_time = LaunchConfiguration("use_sim_time")
     start_delay = LaunchConfiguration("start_delay")
     auv_ns = LaunchConfiguration("auv_ns")
