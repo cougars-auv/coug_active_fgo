@@ -1,5 +1,0 @@
-matplotlib
-PyYAML
-rosbags
-scienceplots
-seaborn
