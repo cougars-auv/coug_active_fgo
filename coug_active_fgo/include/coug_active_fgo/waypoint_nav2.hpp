@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * @file waypoint_nav2.hpp
- * @brief ROS 2 node for relaying waypoints to the Nav2 action server.
- * @author Nelson Durrant
- * @date April 2026
- */
-
 #pragma once
 
 #include <geometry_msgs/msg/pose_array.hpp>
@@ -34,33 +27,16 @@
 
 namespace coug_active_fgo {
 
-/**
- * @class WaypointNav2Node
- * @brief ROS 2 node for relaying waypoints to the Nav2 action server.
- */
 class WaypointNav2Node : public rclcpp::Node {
  public:
   using FollowWaypoints = nav2_msgs::action::FollowWaypoints;
   using GoalHandleFollowWaypoints = rclcpp_action::ClientGoalHandle<FollowWaypoints>;
 
-  /**
-   * @brief Constructs the node and sets up the Nav2 action client.
-   * @param options The node options.
-   */
   explicit WaypointNav2Node(const rclcpp::NodeOptions& options);
 
  private:
-  // --- Logic ---
-  /**
-   * @brief Forwards the waypoints to Nav2, or cancels all goals if the list is empty.
-   * @param msg The incoming PoseArray message containing waypoints.
-   */
   void waypointCallback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
 
-  /**
-   * @brief Logs the mission outcome reported by Nav2.
-   * @param result The result from the action server.
-   */
   void resultCallback(const GoalHandleFollowWaypoints::WrappedResult& result);
 
   // --- ROS Interfaces ---

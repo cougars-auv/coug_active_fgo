@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * @file waypoint_nav2_node.cpp
- * @brief Standalone executable for the WaypointNav2Node.
- * @author Nelson Durrant
- * @date April 2026
- */
-
 #include "coug_active_fgo/waypoint_nav2.hpp"
 
 int main(int argc, char* argv[]) {

@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * @file belief_state_critic.cpp
- * @brief Implementation of the BeliefStateCritic.
- * @author Nelson Durrant
- * @date April 2026
- */
-
 #include "coug_active_fgo/belief_state_critic.hpp"
 
 #include <omp.h>

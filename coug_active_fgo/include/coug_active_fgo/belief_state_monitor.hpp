@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * @file belief_state_monitor.hpp
- * @brief ROS 2 node that publishes the normalized covariance trace for visualization.
- * @author Nelson Durrant
- * @date April 2026
- */
-
 #pragma once
 
 #include <Eigen/Dense>
@@ -31,24 +24,11 @@
 #include "coug_active_fgo/belief_state_monitor_parameters.hpp"
 
 namespace coug_active_fgo {
-
-/**
- * @class BeliefStateMonitorNode
- * @brief ROS 2 node that publishes the normalized covariance trace for visualization.
- */
 class BeliefStateMonitorNode : public rclcpp::Node {
  public:
-  /**
-   * @brief Constructs the node and subscribes to the FGO estimate topics.
-   * @param options The node options.
-   */
   explicit BeliefStateMonitorNode(const rclcpp::NodeOptions& options);
 
  private:
-  // --- Logic ---
-  /**
-   * @brief Publishes the normalized IMU-bias covariance trace once all inputs have arrived.
-   */
   void publishTrace();
 
   // --- ROS Interfaces ---

@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * @file waypoint_nav2.cpp
- * @brief Implementation of the WaypointNav2Node.
- * @author Nelson Durrant
- * @date April 2026
- */
-
 #include "coug_active_fgo/waypoint_nav2.hpp"
 
 #include <rclcpp_components/register_node_macro.hpp>

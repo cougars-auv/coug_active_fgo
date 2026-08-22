@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * @file belief_state_monitor_node.cpp
- * @brief Standalone executable for the BeliefStateMonitorNode.
- * @author Nelson Durrant
- * @date April 2026
- */
-
 #include "coug_active_fgo/belief_state_monitor.hpp"
 
 int main(int argc, char* argv[]) {

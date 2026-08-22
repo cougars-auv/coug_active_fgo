@@ -30,13 +30,6 @@ COLORS = {"Belief State MPPI": "#4C72B0", "Standard MPPI": "#DD8452"}
 
 
 def _is_critic_enabled(bag_path: Path, agent_name: str) -> bool:
-    """
-    Read whether the belief state critic was enabled from a bag's config.
-
-    :param bag_path: Path to the ROS 2 bag directory.
-    :param agent_name: Agent namespace used to select namespaced parameters.
-    :return: True if the belief state critic was enabled.
-    """
     config_paths = [
         bag_path / "config" / "fleet" / "coug_active_fgo_params.yaml",
         bag_path / "config" / f"{agent_name}_params.yaml",
@@ -68,13 +61,6 @@ def _is_critic_enabled(bag_path: Path, agent_name: str) -> bool:
 def _read_norm_trace(
     bag_path: Path, agent: str
 ) -> tuple[list[float], list[float]] | None:
-    """
-    Read the normalized bias trace time series for one agent from a bag.
-
-    :param bag_path: Path to the ROS 2 bag directory.
-    :param agent: Agent namespace to read the norm_trace topic for.
-    :return: Zeroed timestamps and trace values, or None if unavailable.
-    """
     topic = f"/{agent}/belief_state_monitor_node/norm_trace"
     try:
         with AnyReader([bag_path]) as reader:
@@ -98,11 +84,6 @@ def _read_norm_trace(
 
 
 def _render(target_dir: Path) -> None:
-    """
-    Save an overlaid normalized bias trace plot across all bags.
-
-    :param target_dir: Directory tree containing the bags to plot.
-    """
     print("Rendering trace plots...")
     bag_paths = [p.parent for p in target_dir.rglob("metadata.yaml")]
     if not bag_paths:

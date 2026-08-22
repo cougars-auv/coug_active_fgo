@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * @file belief_state_critic.hpp
- * @brief MPPI critic plugin that penalizes state estimation uncertainty.
- * @author Nelson Durrant
- * @date April 2026
- */
-
 #pragma once
 
 #include <Eigen/Dense>
@@ -34,21 +27,10 @@
 
 namespace mppi::critics {
 
-/**
- * @class mppi::critics::BeliefStateCritic
- * @brief MPPI critic plugin that penalizes state estimation uncertainty.
- */
 class BeliefStateCritic : public CriticFunction {
  public:
-  /**
-   * @brief Loads parameters and subscribes to the FGO estimate topics.
-   */
   void initialize() override;
 
-  /**
-   * @brief Adds an uncertainty cost to each rollout by propagating the EKF covariance.
-   * @param data The MPPI critic data; covariance trace costs are added to data.costs.
-   */
   void score(CriticData& data) override;
 
  private:
