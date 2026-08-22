@@ -29,6 +29,7 @@ class BeliefStateMonitorNode : public rclcpp::Node {
   explicit BeliefStateMonitorNode(const rclcpp::NodeOptions& options);
 
  private:
+  // --- Helpers ---
   void publishTrace();
 
   // --- ROS Interfaces ---
