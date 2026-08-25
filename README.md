@@ -9,7 +9,7 @@
   <img src=".github/assets/rviz.gif" width="600">
 </p>
 
-## 🚀 Get Started
+## Get Started
 
 > **Prerequisites:** 64-bit Linux, free disk space (5+ GB recommended).
 
@@ -28,7 +28,7 @@
   cd coug_active_fgo/demo && docker compose up
   ```
 
-## 📊 Results
+## Results
 
 ### Challenges
 
@@ -58,7 +58,7 @@ The demo demonstrates the BeliefStateCritic encouraging excitation-rich maneuver
 
 Gemini 3.1 Pro was used as a collaborative partner for initial brainstorming, and Claude Opus 4.6 was used for code simplification and speed suggestions.
 
-## 💡 Elevator Pitch
+## Elevator Pitch
 
 ### Problem
 Effective underwater navigation requires balancing both progressing toward a goal and maintaining an accurate state estimate. For AUVs relying extensively on internal sensors (IMU, DVL, etc), excitation – changes in acceleration and velocity – can often improve state estimate accuracy. This conflicts with the goal-directed approach of many AUV path planners and controllers.
@@ -86,7 +86,7 @@ To simplify the scope of the project, I will make use of the HoloOcean simulator
 3) Implement a new heuristic plugin to simulate uncertainty propagation and penalize trajectories based on the trace of the resulting covariance matrix, forcing the the controller to favor excitation-rich action sequences
 4) Benchmark the resulting algorithm’s uncertainty growth over a set waypoint sequence against a baseline MPPI controller
 
-## 🤝 Contributing
+## Contributing
 
 - **Create a Branch:** Create a new branch using the format `name/feature` (e.g., `nelson/repo-docs`).
 
@@ -98,7 +98,7 @@ To simplify the scope of the project, I will make use of the HoloOcean simulator
 
 - **Submit a PR:** Open a pull request, ensure required tests pass, and merge once approved. Upon merge to `main`, GitHub Actions will automatically build and push updated images to Docker Hub with any new dependencies.
 
-## 📦 Releasing
+## Releasing
 
 We adhere to the **Semantic Versioning (SemVer 2.0.0)** standard to release new versions of this repository:
 > Given a version number **`MAJOR.MINOR.PATCH`**, increment the:
@@ -117,7 +117,7 @@ We adhere to the **Semantic Versioning (SemVer 2.0.0)** standard to release new 
 
 - **Publish a GitHub Release:** Review the draft release in GitHub and click **Publish**.
 
-## 📚 Citations
+## Citations
 
 Please cite our relevant publications if you find this repository useful for your research:
 
