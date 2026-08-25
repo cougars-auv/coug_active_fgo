@@ -43,12 +43,12 @@ class BeliefStateMonitorNode : public rclcpp::Node {
   belief_state_monitor_node::Params params_;
 
   // --- State ---
-  Eigen::Matrix<double, 15, 15> Sigma_{Eigen::Matrix<double, 15, 15>::Identity()};
-  Eigen::Matrix<double, 6, 6> Sigma0_bias_inv_{Eigen::Matrix<double, 6, 6>::Identity()};
+  Eigen::Matrix<double, 15, 15> state_cov_{Eigen::Matrix<double, 15, 15>::Identity()};
+  Eigen::Matrix<double, 6, 6> init_bias_cov_inv_{Eigen::Matrix<double, 6, 6>::Identity()};
   bool received_odom_{false};
   bool received_vel_{false};
   bool received_bias_{false};
-  bool sigma0_set_{false};
+  bool init_cov_set_{false};
   double last_trace_{-1.0};
 };
 

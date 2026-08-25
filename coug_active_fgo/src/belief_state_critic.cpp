@@ -40,10 +40,10 @@ void BeliefStateCritic::initialize() {
   getParam(gyro_bias_rw_sigmas, "gyro_bias_rw_sigmas", std::vector<double>{3.5e-6, 3.5e-6, 3.5e-6});
   getParam(integration_covariance_, "integration_covariance", 1.0e-8);
 
-  Q_gyro_cov_ = toDiagCov(gyro_noise_sigmas);
-  Q_accel_cov_ = toDiagCov(accel_noise_sigmas);
-  Q_accel_bias_cov_ = toDiagCov(accel_bias_rw_sigmas);
-  Q_gyro_bias_cov_ = toDiagCov(gyro_bias_rw_sigmas);
+  gyro_noise_cov_ = toDiagCov(gyro_noise_sigmas);
+  accel_noise_cov_ = toDiagCov(accel_noise_sigmas);
+  accel_bias_rw_cov_ = toDiagCov(accel_bias_rw_sigmas);
+  gyro_bias_rw_cov_ = toDiagCov(gyro_bias_rw_sigmas);
 
   std::vector<double> velocity_noise_sigmas;
   double yaw_noise_sigma;
@@ -53,8 +53,8 @@ void BeliefStateCritic::initialize() {
   getParam(velocity_noise_sigmas, "velocity_noise_sigmas", std::vector<double>{0.02, 0.02, 0.02});
   getParam(yaw_noise_sigma, "yaw_noise_sigma", 0.01745);
 
-  R_dvl_ = toDiagCov(velocity_noise_sigmas);
-  R_ahrs_ = Eigen::Matrix<double, 1, 1>::Constant(std::pow(yaw_noise_sigma, 2));
+  dvl_noise_cov_ = toDiagCov(velocity_noise_sigmas);
+  ahrs_noise_cov_ = Eigen::Matrix<double, 1, 1>::Constant(std::pow(yaw_noise_sigma, 2));
 
   getParam(fgo_odom_topic_, "fgo_odom_topic", std::string("odometry/global"));
   getParam(fgo_vel_topic_, "fgo_vel_topic", std::string("factor_graph_node/velocity"));
@@ -66,50 +66,50 @@ void BeliefStateCritic::initialize() {
       fgo_odom_topic_, rclcpp::SystemDefaultsQoS(),
       [this](const nav_msgs::msg::Odometry::SharedPtr msg) {
         // Pose of the base frame in the map frame
-        const auto& c = msg->pose.covariance;
+        const auto& cov_msg = msg->pose.covariance;
         Eigen::Matrix<double, 6, 6> pose_cov;
         for (int i = 0; i < 3; ++i) {
           for (int j = 0; j < 3; ++j) {
-            pose_cov(i, j) = c[(i + 3) * 6 + (j + 3)];
-            pose_cov(i + 3, j + 3) = c[i * 6 + j];
-            pose_cov(i, j + 3) = c[(i + 3) * 6 + j];
-            pose_cov(i + 3, j) = c[i * 6 + (j + 3)];
+            pose_cov(i, j) = cov_msg[(i + 3) * 6 + (j + 3)];
+            pose_cov(i + 3, j + 3) = cov_msg[i * 6 + j];
+            pose_cov(i, j + 3) = cov_msg[(i + 3) * 6 + j];
+            pose_cov(i + 3, j) = cov_msg[i * 6 + (j + 3)];
           }
         }
-        std::lock_guard<std::mutex> lock(sigma0_mutex_);
-        Sigma0_.block<6, 6>(0, 0) = pose_cov;
+        std::lock_guard<std::mutex> lock(state_cov_mutex_);
+        init_state_cov_.block<6, 6>(0, 0) = pose_cov;
         received_odom_.store(true);
       });
 
-  fgo_velocity_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
+  fgo_vel_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       fgo_vel_topic_, rclcpp::SystemDefaultsQoS(),
       [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
         // Velocity of the target frame in the map frame
         // For simplicity, we assume it's at the base frame here
-        const auto& c = msg->twist.covariance;
-        Eigen::Matrix<double, 3, 3> vel_cov;
+        const auto& cov_msg = msg->twist.covariance;
+        Eigen::Matrix3d vel_cov;
         for (int i = 0; i < 3; ++i) {
           for (int j = 0; j < 3; ++j) {
-            vel_cov(i, j) = c[i * 6 + j];
+            vel_cov(i, j) = cov_msg[i * 6 + j];
           }
         }
-        std::lock_guard<std::mutex> lock(sigma0_mutex_);
-        Sigma0_.block<3, 3>(6, 6) = vel_cov;
+        std::lock_guard<std::mutex> lock(state_cov_mutex_);
+        init_state_cov_.block<3, 3>(6, 6) = vel_cov;
         received_vel_.store(true);
       });
 
   fgo_bias_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       fgo_bias_topic_, rclcpp::SystemDefaultsQoS(),
       [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
-        const auto& c = msg->twist.covariance;
+        const auto& cov_msg = msg->twist.covariance;
         Eigen::Matrix<double, 6, 6> bias_cov;
         for (int i = 0; i < 6; ++i) {
           for (int j = 0; j < 6; ++j) {
-            bias_cov(i, j) = c[i * 6 + j];
+            bias_cov(i, j) = cov_msg[i * 6 + j];
           }
         }
-        std::lock_guard<std::mutex> lock(sigma0_mutex_);
-        Sigma0_.block<6, 6>(9, 9) = bias_cov;
+        std::lock_guard<std::mutex> lock(state_cov_mutex_);
+        init_state_cov_.block<6, 6>(9, 9) = bias_cov;
         received_bias_.store(true);
       });
 
@@ -128,108 +128,112 @@ void BeliefStateCritic::score(CriticData& data) {
   const size_t time_steps = data.trajectories.x.shape(1);
   const double dt = static_cast<double>(data.model_dt);
 
-  Eigen::Matrix<double, 15, 15> Sigma0;
-  Eigen::Matrix<double, 6, 6> Sigma0_bias_inv;
+  Eigen::Matrix<double, 15, 15> init_cov;
+  Eigen::Matrix<double, 6, 6> init_bias_cov_inv;
   {
-    std::lock_guard<std::mutex> lock(sigma0_mutex_);
-    Sigma0 = Sigma0_;
-    Sigma0_bias_inv = Sigma0_.block<6, 6>(9, 9).inverse();
+    std::lock_guard<std::mutex> lock(state_cov_mutex_);
+    init_cov = init_state_cov_;
+    init_bias_cov_inv = init_state_cov_.block<6, 6>(9, 9).inverse();
   }
 
-  const double dt2 = dt * dt;
-  Eigen::Matrix<double, 15, 15> Q_step = Eigen::Matrix<double, 15, 15>::Zero();
-  Q_step.block<3, 3>(0, 0) = Q_gyro_cov_ * dt;
-  Q_step.block<3, 3>(3, 3) = Eigen::Matrix3d::Identity() * integration_covariance_ * dt;
-  Q_step.block<3, 3>(6, 6) = Q_accel_cov_ * dt;
-  Q_step.block<3, 3>(9, 9) = Q_accel_bias_cov_ * dt;
-  Q_step.block<3, 3>(12, 12) = Q_gyro_bias_cov_ * dt;
+  const double dt_sq = dt * dt;
+  Eigen::Matrix<double, 15, 15> process_noise_cov = Eigen::Matrix<double, 15, 15>::Zero();
+  process_noise_cov.block<3, 3>(0, 0) = gyro_noise_cov_ * dt;
+  process_noise_cov.block<3, 3>(3, 3) = Eigen::Matrix3d::Identity() * integration_covariance_ * dt;
+  process_noise_cov.block<3, 3>(6, 6) = accel_noise_cov_ * dt;
+  process_noise_cov.block<3, 3>(9, 9) = accel_bias_rw_cov_ * dt;
+  process_noise_cov.block<3, 3>(12, 12) = gyro_bias_rw_cov_ * dt;
 
-  const Eigen::Matrix<double, 15, 15> I_15 = Eigen::Matrix<double, 15, 15>::Identity();
-  const Eigen::Matrix3d I_3 = Eigen::Matrix3d::Identity();
-  Eigen::Matrix<double, 1, 15> H_ahrs = Eigen::Matrix<double, 1, 15>::Zero();
-  H_ahrs(0, 2) = 1.0;
+  const Eigen::Matrix<double, 15, 15> I_15x15 = Eigen::Matrix<double, 15, 15>::Identity();
+  const Eigen::Matrix3d I_3x3 = Eigen::Matrix3d::Identity();
+  Eigen::Matrix<double, 1, 15> J_ahrs_state = Eigen::Matrix<double, 1, 15>::Zero();
+  J_ahrs_state(0, 2) = 1.0;
 
   const double dvl_period = 1.0 / dvl_update_rate_hz_;
   const double ahrs_period = 1.0 / ahrs_update_rate_hz_;
 
   // Iterate through each rollout in the batch
 #pragma omp parallel for schedule(static)
-  for (size_t i = 0; i < batch_size; ++i) {
-    Eigen::Matrix<double, 15, 15> Sigma_i = Sigma0;
+  for (size_t batch_idx = 0; batch_idx < batch_size; ++batch_idx) {
+    Eigen::Matrix<double, 15, 15> rollout_cov = init_cov;
 
-    double t_last_dvl = 0.0;
-    double t_last_ahrs = 0.0;
+    double last_dvl_time = 0.0;
+    double last_ahrs_time = 0.0;
     double curr_sim_time = 0.0;
 
-    for (size_t t = 0; t < time_steps; ++t) {
-      const double psi = static_cast<double>(data.trajectories.yaws(i, t));
-      const double cpsi = std::cos(psi);
-      const double spsi = std::sin(psi);
+    for (size_t step = 0; step < time_steps; ++step) {
+      const double yaw = static_cast<double>(data.trajectories.yaws(batch_idx, step));
+      const double cos_yaw = std::cos(yaw);
+      const double sin_yaw = std::sin(yaw);
       curr_sim_time += dt;
 
       // --- PREDICTION STEP ---
-      Eigen::Matrix3d Rz;
-      Rz << cpsi, -spsi, 0, spsi, cpsi, 0, 0, 0, 1;
+      Eigen::Matrix3d map_R_base;
+      map_R_base << cos_yaw, -sin_yaw, 0, sin_yaw, cos_yaw, 0, 0, 0, 1;
 
       // Estimate map-frame acceleration
-      Eigen::Vector3d a_map = Eigen::Vector3d::Zero();
-      if (t + 1 < time_steps) {
-        const double psi_n = static_cast<double>(data.trajectories.yaws(i, t + 1));
-        const double vx_b = static_cast<double>(data.state.vx(i, t));
-        const double vy_b = static_cast<double>(data.state.vy(i, t));
-        const double vx_bn = static_cast<double>(data.state.vx(i, t + 1));
-        const double vy_bn = static_cast<double>(data.state.vy(i, t + 1));
-        const Eigen::Vector3d v_map(cpsi * vx_b - spsi * vy_b, spsi * vx_b + cpsi * vy_b, 0.0);
-        const Eigen::Vector3d v_map_n(std::cos(psi_n) * vx_bn - std::sin(psi_n) * vy_bn,
-                                      std::sin(psi_n) * vx_bn + std::cos(psi_n) * vy_bn, 0.0);
-        a_map = (v_map_n - v_map) / dt;
+      Eigen::Vector3d map_a_base = Eigen::Vector3d::Zero();
+      if (step + 1 < time_steps) {
+        const double next_yaw = static_cast<double>(data.trajectories.yaws(batch_idx, step + 1));
+        const double base_vx = static_cast<double>(data.state.vx(batch_idx, step));
+        const double base_vy = static_cast<double>(data.state.vy(batch_idx, step));
+        const double next_base_vx = static_cast<double>(data.state.vx(batch_idx, step + 1));
+        const double next_base_vy = static_cast<double>(data.state.vy(batch_idx, step + 1));
+        const Eigen::Vector3d map_v_base(cos_yaw * base_vx - sin_yaw * base_vy,
+                                         sin_yaw * base_vx + cos_yaw * base_vy, 0.0);
+        const Eigen::Vector3d next_map_v_base(
+            std::cos(next_yaw) * next_base_vx - std::sin(next_yaw) * next_base_vy,
+            std::sin(next_yaw) * next_base_vx + std::cos(next_yaw) * next_base_vy, 0.0);
+        map_a_base = (next_map_v_base - map_v_base) / dt;
       }
 
-      Eigen::Matrix<double, 15, 15> F = I_15;
-      F.block<3, 3>(3, 6) = I_3 * dt;         // d(pos)/d(vel)
-      F.block<3, 3>(6, 9) = -Rz * dt;         // d(vel)/d(accel_bias)
-      F.block<3, 3>(3, 9) = -Rz * 0.5 * dt2;  // d(pos)/d(accel_bias)
-      F.block<3, 3>(0, 12) = -I_3 * dt;       // d(orientation)/d(gyro_bias)
-      F.block<3, 1>(6, 2) =                   // d(vel)/d(yaw)
-          (Eigen::Matrix3d() << -spsi, -cpsi, 0, cpsi, -spsi, 0, 0, 0, 0).finished() *
-          (Rz.transpose() * a_map) * dt;
+      Eigen::Matrix<double, 15, 15> J_state_prev = I_15x15;
+      J_state_prev.block<3, 3>(3, 6) = I_3x3 * dt;                 // d(pos)/d(vel)
+      J_state_prev.block<3, 3>(6, 9) = -map_R_base * dt;           // d(vel)/d(accel_bias)
+      J_state_prev.block<3, 3>(3, 9) = -map_R_base * 0.5 * dt_sq;  // d(pos)/d(accel_bias)
+      J_state_prev.block<3, 3>(0, 12) = -I_3x3 * dt;               // d(orientation)/d(gyro_bias)
+      J_state_prev.block<3, 1>(6, 2) =                             // d(vel)/d(yaw)
+          (Eigen::Matrix3d() << -sin_yaw, -cos_yaw, 0, cos_yaw, -sin_yaw, 0, 0, 0, 0).finished() *
+          (map_R_base.transpose() * map_a_base) * dt;
 
-      // Σ_i = F * Σ_i * F^T + Q
-      Sigma_i = F * Sigma_i * F.transpose() + Q_step;
+      // rollout_cov = J * rollout_cov * J^T + Q
+      rollout_cov = J_state_prev * rollout_cov * J_state_prev.transpose() + process_noise_cov;
 
       // --- UPDATE STEPS ---
-      const bool trigger_dvl = (curr_sim_time - t_last_dvl) >= dvl_period;
-      const bool trigger_ahrs = (curr_sim_time - t_last_ahrs) >= ahrs_period;
+      const bool trigger_dvl = (curr_sim_time - last_dvl_time) >= dvl_period;
+      const bool trigger_ahrs = (curr_sim_time - last_ahrs_time) >= ahrs_period;
 
       if (trigger_dvl) {
         // Maps map-frame velocity to base-frame DVL measurements
-        Eigen::Matrix<double, 3, 15> H_dvl = Eigen::Matrix<double, 3, 15>::Zero();
-        H_dvl.block<3, 3>(0, 6) << cpsi, spsi, 0.0, -spsi, cpsi, 0.0, 0.0, 0.0, 1.0;
+        Eigen::Matrix<double, 3, 15> J_dvl_state = Eigen::Matrix<double, 3, 15>::Zero();
+        J_dvl_state.block<3, 3>(0, 6) << cos_yaw, sin_yaw, 0.0, -sin_yaw, cos_yaw, 0.0, 0.0, 0.0,
+            1.0;
 
-        // K = Σ_i * H^T * (H * Σ_i * H^T + R)^-1
-        const Eigen::Matrix<double, 15, 3> K =
-            Sigma_i * H_dvl.transpose() * (H_dvl * Sigma_i * H_dvl.transpose() + R_dvl_).inverse();
+        // kalman_gain = rollout_cov * J^T * (J * rollout_cov * J^T + R)^-1
+        const Eigen::Matrix<double, 15, 3> kalman_gain =
+            rollout_cov * J_dvl_state.transpose() *
+            (J_dvl_state * rollout_cov * J_dvl_state.transpose() + dvl_noise_cov_).inverse();
 
-        // Σ_i = (I - K*H) * Σ_i
-        Sigma_i = (I_15 - K * H_dvl) * Sigma_i;
-        t_last_dvl = curr_sim_time;
+        // rollout_cov = (I - kalman_gain * J) * rollout_cov
+        rollout_cov = (I_15x15 - kalman_gain * J_dvl_state) * rollout_cov;
+        last_dvl_time = curr_sim_time;
       }
 
       if (trigger_ahrs) {
-        // K = Σ_i * H^T * (H * Σ_i * H^T + R)^-1
-        const Eigen::Matrix<double, 15, 1> K =
-            Sigma_i * H_ahrs.transpose() *
-            (H_ahrs * Sigma_i * H_ahrs.transpose() + R_ahrs_).inverse();
+        // kalman_gain = rollout_cov * J^T * (J * rollout_cov * J^T + R)^-1
+        const Eigen::Matrix<double, 15, 1> kalman_gain =
+            rollout_cov * J_ahrs_state.transpose() *
+            (J_ahrs_state * rollout_cov * J_ahrs_state.transpose() + ahrs_noise_cov_).inverse();
 
-        // Σ_i = (I - K*H) * Σ_i
-        Sigma_i = (I_15 - K * H_ahrs) * Sigma_i;
-        t_last_ahrs = curr_sim_time;
+        // rollout_cov = (I - kalman_gain * J) * rollout_cov
+        rollout_cov = (I_15x15 - kalman_gain * J_ahrs_state) * rollout_cov;
+        last_ahrs_time = curr_sim_time;
       }
     }
     // Compute the normalized trace over the IMU bias covariance block
     const float norm_trace =
-        static_cast<float>((Sigma0_bias_inv * Sigma_i.block<6, 6>(9, 9)).trace());
-    data.costs(i) += std::pow(weight_ * norm_trace, power_);
+        static_cast<float>((init_bias_cov_inv * rollout_cov.block<6, 6>(9, 9)).trace());
+    data.costs(batch_idx) += std::pow(weight_ * norm_trace, power_);
   }
 }
 

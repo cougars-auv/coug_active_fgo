@@ -39,12 +39,12 @@ class BeliefStateCritic : public CriticFunction {
   float weight_{0};
   float dvl_update_rate_hz_{0};
   float ahrs_update_rate_hz_{0};
-  Eigen::Matrix<double, 3, 3> R_dvl_;
-  Eigen::Matrix<double, 1, 1> R_ahrs_;
-  Eigen::Matrix<double, 3, 3> Q_gyro_cov_;
-  Eigen::Matrix<double, 3, 3> Q_accel_cov_;
-  Eigen::Matrix<double, 3, 3> Q_accel_bias_cov_;
-  Eigen::Matrix<double, 3, 3> Q_gyro_bias_cov_;
+  Eigen::Matrix3d dvl_noise_cov_;
+  Eigen::Matrix<double, 1, 1> ahrs_noise_cov_;
+  Eigen::Matrix3d gyro_noise_cov_;
+  Eigen::Matrix3d accel_noise_cov_;
+  Eigen::Matrix3d accel_bias_rw_cov_;
+  Eigen::Matrix3d gyro_bias_rw_cov_;
   double integration_covariance_{0};
 
   // --- ROS Interfaces ---
@@ -52,13 +52,13 @@ class BeliefStateCritic : public CriticFunction {
   std::string fgo_vel_topic_;
   std::string fgo_bias_topic_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr fgo_odom_sub_;
-  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fgo_velocity_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fgo_vel_sub_;
   rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fgo_bias_sub_;
   rclcpp::Clock::SharedPtr clock_;
 
   // --- State ---
-  mutable std::mutex sigma0_mutex_;
-  Eigen::Matrix<double, 15, 15> Sigma0_{Eigen::Matrix<double, 15, 15>::Identity()};
+  mutable std::mutex state_cov_mutex_;
+  Eigen::Matrix<double, 15, 15> init_state_cov_{Eigen::Matrix<double, 15, 15>::Identity()};
   std::atomic<bool> received_odom_{false};
   std::atomic<bool> received_vel_{false};
   std::atomic<bool> received_bias_{false};

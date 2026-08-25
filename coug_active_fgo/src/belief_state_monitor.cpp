@@ -28,17 +28,17 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
   odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
       params_.fgo_odom_topic, rclcpp::SystemDefaultsQoS(),
       [this](const nav_msgs::msg::Odometry::SharedPtr msg) {
-        const auto& c = msg->pose.covariance;
+        const auto& cov_msg = msg->pose.covariance;
         Eigen::Matrix<double, 6, 6> pose_cov;
         for (int i = 0; i < 3; ++i) {
           for (int j = 0; j < 3; ++j) {
-            pose_cov(i, j) = c[(i + 3) * 6 + (j + 3)];
-            pose_cov(i + 3, j + 3) = c[i * 6 + j];
-            pose_cov(i, j + 3) = c[(i + 3) * 6 + j];
-            pose_cov(i + 3, j) = c[i * 6 + (j + 3)];
+            pose_cov(i, j) = cov_msg[(i + 3) * 6 + (j + 3)];
+            pose_cov(i + 3, j + 3) = cov_msg[i * 6 + j];
+            pose_cov(i, j + 3) = cov_msg[(i + 3) * 6 + j];
+            pose_cov(i + 3, j) = cov_msg[i * 6 + (j + 3)];
           }
         }
-        Sigma_.block<6, 6>(0, 0) = pose_cov;
+        state_cov_.block<6, 6>(0, 0) = pose_cov;
         received_odom_ = true;
         publishTrace();
       });
@@ -46,14 +46,14 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
   vel_sub_ = create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       params_.fgo_vel_topic, rclcpp::SystemDefaultsQoS(),
       [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
-        const auto& c = msg->twist.covariance;
-        Eigen::Matrix<double, 3, 3> vel_cov;
+        const auto& cov_msg = msg->twist.covariance;
+        Eigen::Matrix3d vel_cov;
         for (int i = 0; i < 3; ++i) {
           for (int j = 0; j < 3; ++j) {
-            vel_cov(i, j) = c[i * 6 + j];
+            vel_cov(i, j) = cov_msg[i * 6 + j];
           }
         }
-        Sigma_.block<3, 3>(6, 6) = vel_cov;
+        state_cov_.block<3, 3>(6, 6) = vel_cov;
         received_vel_ = true;
         publishTrace();
       });
@@ -61,14 +61,14 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
   bias_sub_ = create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       params_.fgo_bias_topic, rclcpp::SystemDefaultsQoS(),
       [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
-        const auto& c = msg->twist.covariance;
+        const auto& cov_msg = msg->twist.covariance;
         Eigen::Matrix<double, 6, 6> bias_cov;
         for (int i = 0; i < 6; ++i) {
           for (int j = 0; j < 6; ++j) {
-            bias_cov(i, j) = c[i * 6 + j];
+            bias_cov(i, j) = cov_msg[i * 6 + j];
           }
         }
-        Sigma_.block<6, 6>(9, 9) = bias_cov;
+        state_cov_.block<6, 6>(9, 9) = bias_cov;
         received_bias_ = true;
         publishTrace();
       });
@@ -84,12 +84,12 @@ void BeliefStateMonitorNode::publishTrace() {
     return;
   }
 
-  if (!sigma0_set_) {
-    Sigma0_bias_inv_ = Sigma_.block<6, 6>(9, 9).inverse();
-    sigma0_set_ = true;
+  if (!init_cov_set_) {
+    init_bias_cov_inv_ = state_cov_.block<6, 6>(9, 9).inverse();
+    init_cov_set_ = true;
   }
 
-  double trace = (Sigma0_bias_inv_ * Sigma_.block<6, 6>(9, 9)).trace();
+  double trace = (init_bias_cov_inv_ * state_cov_.block<6, 6>(9, 9)).trace();
   if (trace == last_trace_) {
     return;
   }
