@@ -26,7 +26,7 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
 
   // --- ROS Interfaces ---
   odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
-      params_.fgo_odom_topic, rclcpp::SystemDefaultsQoS(),
+      params_.fg_odom_topic, rclcpp::SystemDefaultsQoS(),
       [this](const nav_msgs::msg::Odometry::SharedPtr msg) {
         const auto& cov_msg = msg->pose.covariance;
         Eigen::Matrix<double, 6, 6> pose_cov;
@@ -44,7 +44,7 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
       });
 
   vel_sub_ = create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
-      params_.fgo_vel_topic, rclcpp::SystemDefaultsQoS(),
+      params_.fg_vel_topic, rclcpp::SystemDefaultsQoS(),
       [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
         const auto& cov_msg = msg->twist.covariance;
         Eigen::Matrix3d vel_cov;
@@ -59,7 +59,7 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
       });
 
   bias_sub_ = create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
-      params_.fgo_bias_topic, rclcpp::SystemDefaultsQoS(),
+      params_.fg_bias_topic, rclcpp::SystemDefaultsQoS(),
       [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
         const auto& cov_msg = msg->twist.covariance;
         Eigen::Matrix<double, 6, 6> bias_cov;

@@ -48,12 +48,12 @@ class BeliefStateCritic : public CriticFunction {
   double integration_covariance_{0};
 
   // --- ROS Interfaces ---
-  std::string fgo_odom_topic_;
-  std::string fgo_vel_topic_;
-  std::string fgo_bias_topic_;
-  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr fgo_odom_sub_;
-  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fgo_vel_sub_;
-  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fgo_bias_sub_;
+  std::string fg_odom_topic_;
+  std::string fg_vel_topic_;
+  std::string fg_bias_topic_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr fg_odom_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fg_vel_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fg_bias_sub_;
   rclcpp::Clock::SharedPtr clock_;
 
   // --- State ---

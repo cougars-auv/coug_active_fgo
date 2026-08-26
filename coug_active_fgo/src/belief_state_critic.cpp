@@ -56,14 +56,14 @@ void BeliefStateCritic::initialize() {
   dvl_noise_cov_ = toDiagCov(velocity_noise_sigmas);
   ahrs_noise_cov_ = Eigen::Matrix<double, 1, 1>::Constant(std::pow(yaw_noise_sigma, 2));
 
-  getParam(fgo_odom_topic_, "fgo_odom_topic", std::string("odometry/global"));
-  getParam(fgo_vel_topic_, "fgo_vel_topic", std::string("factor_graph_node/velocity"));
-  getParam(fgo_bias_topic_, "fgo_bias_topic", std::string("factor_graph_node/imu/bias"));
+  getParam(fg_odom_topic_, "fg_odom_topic", std::string("odometry/global"));
+  getParam(fg_vel_topic_, "fg_vel_topic", std::string("factor_graph_node/velocity"));
+  getParam(fg_bias_topic_, "fg_bias_topic", std::string("factor_graph_node/imu/bias"));
 
   auto node = parent_.lock();
   clock_ = node->get_clock();
-  fgo_odom_sub_ = node->create_subscription<nav_msgs::msg::Odometry>(
-      fgo_odom_topic_, rclcpp::SystemDefaultsQoS(),
+  fg_odom_sub_ = node->create_subscription<nav_msgs::msg::Odometry>(
+      fg_odom_topic_, rclcpp::SystemDefaultsQoS(),
       [this](const nav_msgs::msg::Odometry::SharedPtr msg) {
         // Pose of the base frame in the map frame
         const auto& cov_msg = msg->pose.covariance;
@@ -81,8 +81,8 @@ void BeliefStateCritic::initialize() {
         received_odom_.store(true);
       });
 
-  fgo_vel_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
-      fgo_vel_topic_, rclcpp::SystemDefaultsQoS(),
+  fg_vel_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
+      fg_vel_topic_, rclcpp::SystemDefaultsQoS(),
       [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
         // Velocity of the target frame in the map frame
         // For simplicity, we assume it's at the base frame here
@@ -98,8 +98,8 @@ void BeliefStateCritic::initialize() {
         received_vel_.store(true);
       });
 
-  fgo_bias_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
-      fgo_bias_topic_, rclcpp::SystemDefaultsQoS(),
+  fg_bias_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
+      fg_bias_topic_, rclcpp::SystemDefaultsQoS(),
       [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
         const auto& cov_msg = msg->twist.covariance;
         Eigen::Matrix<double, 6, 6> bias_cov;

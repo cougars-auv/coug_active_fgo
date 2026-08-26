@@ -1,15 +1,15 @@
 belief_state_monitor_node:
-  fgo_odom_topic:
+  fg_odom_topic:
     type: string
     default_value: "odometry/global"
     validation:
       not_empty<>: []
-  fgo_vel_topic:
+  fg_vel_topic:
     type: string
     default_value: "factor_graph_node/velocity"
     validation:
       not_empty<>: []
-  fgo_bias_topic:
+  fg_bias_topic:
     type: string
     default_value: "factor_graph_node/imu/bias"
     validation:
