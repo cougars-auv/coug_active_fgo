@@ -25,11 +25,11 @@ WaypointNav2Node::WaypointNav2Node(const rclcpp::NodeOptions& options)
   params_ = param_listener_->get_params();
 
   // --- ROS Interfaces ---
-  nav2_client_ = rclcpp_action::create_client<FollowWaypoints>(this, "follow_waypoints");
-
   waypoint_sub_ = create_subscription<geometry_msgs::msg::PoseArray>(
       params_.waypoint_topic, rclcpp::SystemDefaultsQoS(),
       std::bind(&WaypointNav2Node::waypointCallback, this, std::placeholders::_1));
+
+  nav2_client_ = rclcpp_action::create_client<FollowWaypoints>(this, "follow_waypoints");
 
   RCLCPP_INFO(get_logger(), "Initialization complete.");
 }

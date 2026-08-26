@@ -41,8 +41,8 @@ class WaypointNav2Node : public rclcpp::Node {
   void resultCallback(const GoalHandleFollowWaypoints::WrappedResult& result);
 
   // --- ROS Interfaces ---
-  rclcpp_action::Client<nav2_msgs::action::FollowWaypoints>::SharedPtr nav2_client_;
   rclcpp::Subscription<geometry_msgs::msg::PoseArray>::SharedPtr waypoint_sub_;
+  rclcpp_action::Client<nav2_msgs::action::FollowWaypoints>::SharedPtr nav2_client_;
 
   // --- Parameters ---
   std::shared_ptr<waypoint_nav2_node::ParamListener> param_listener_;

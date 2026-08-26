@@ -24,6 +24,7 @@
 #include "coug_belief_mppi/belief_state_monitor_parameters.hpp"
 
 namespace coug_belief_mppi {
+
 class BeliefStateMonitorNode : public rclcpp::Node {
  public:
   explicit BeliefStateMonitorNode(const rclcpp::NodeOptions& options);
