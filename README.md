@@ -32,13 +32,13 @@
 
 ### Challenges
 
-There were several challenging aspects of this project, including Nav2 integration debugging, pivoting to a downstream HoloOcean controller for dynamics modeling (“nav2_mppi_controller” does not easily support custom dynamics plugins, contrary to my initial research), and deriving and verifying the Jacobeans for the EKF predict and update steps in the BeliefStateCritic.
+There were several challenging aspects of this project, including Nav2 integration debugging and deriving the Jacobeans for the EKF predict and update steps in the BeliefStateCritic.
 
-The two most challenging aspects, however, were (1) getting the code to run fast enough for real-time control, and (2) effectively tuning the trace heuristic. Even using OpenMP for CPU parallelism and performing extensive pre-computation, I was only able to run 250 rollouts of 15 steps of 0.1 seconds executing at 10 Hz on my lab computer with all 32 CPUs maxed out at 100%. Additionally, the full unnormalized covariance trace was dominated by the growing positional uncertainty inherent to dead reckoning and skewed by mixed units. To maximize the heuristic's impact over just a 1.5-second horizon, I chose to score the trajectory using the normalized hidden IMU bias covariances instead.
+The two most challenging aspects, however, were (1) getting the code to run fast enough for real-time control, and (2) effectively tuning the trace heuristic. Even using OpenMP for CPU parallelism and performing extensive pre-computation, I was only able to run 250 rollouts of 15 steps of 0.1 seconds executing at 10 Hz on my lab computer with all 32 CPUs maxed out at 100%. Additionally, the full unnormalized covariance trace was dominated by the growing positional uncertainty inherent to dead reckoning and skewed by mixed units. To maximize the heuristic's impact over just a 1.5-second horizon, I chose to score the trajectory using the normalized IMU bias covariances instead.
 
 ### Experiments & Validation
 
-To isolate and validate the performance of the BeliefStateCritic, I ran 6 missions – 3 with only the BeliefStateCritic enabled, and 3 with it disabled – and monitored the normalized IMU bias covariance trace over time. The BeliefStateCritic effectively and consistently identified uncertainty-reducing maneuvers as shown in the plot below.
+To isolate and validate the performance of the BeliefStateCritic, I ran 6 missions – 3 with only the BeliefStateCritic enabled, and 3 with it disabled – and monitored the normalized IMU bias covariance trace over time. The BeliefStateCritic effectively identified uncertainty-reducing maneuvers as shown in the plot below.
 
 <br>
 
@@ -67,18 +67,6 @@ Finding the optimal trajectory that balances goal achievement with state estimat
 
 ### Proposed Solution Approach
 To solve this continuous-time MDP in real-time, I plan to implement an open-loop Model Predictive Path Integral (MPPI) controller, which is the continuous-time version of the Multiforecast Model Predictive Control (MMPC) approach described in section 9.9.3 of the textbook. During each planning cycle, the MPPI algorithm will sample a large number of stochastic trajectory rollouts, evaluate them against a heuristic that penalizes both deviation from the goal and the trace of the covariance matrix, and execute the first step of the averaged optimal control sequence. 
-
-<br>
-
-<p align="center">
-  <img src=".github/assets/output.gif" width="500">
-</p>
-
-<p align="center">
-  <em>Fig. 1. Simplified Belief State MPPI visualization.</em>
-</p>
-
-<br>
 
 To simplify the scope of the project, I will make use of the HoloOcean simulator and Nav2’s CPU-optimized “nav2_mppi_controller” class available in ROS 2. Specifically, I plan to:
 1) Integrate Nav2’s “nav2_mppi_controller” with the HoloOcean simulator
