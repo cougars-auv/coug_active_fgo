@@ -26,7 +26,7 @@ void BeliefStateCritic::initialize() {
   getParam(power_, "cost_power", 1);
   getParam(weight_, "cost_weight", 5.0);
 
-  auto toDiagCov = [](const std::vector<double>& sigmas) {
+  auto to_diag_cov = [](const std::vector<double>& sigmas) {
     return Eigen::Vector3d::Map(sigmas.data()).cwiseAbs2().asDiagonal();
   };
 
@@ -40,10 +40,10 @@ void BeliefStateCritic::initialize() {
   getParam(gyro_bias_rw_sigmas, "gyro_bias_rw_sigmas", std::vector<double>{3.5e-6, 3.5e-6, 3.5e-6});
   getParam(integration_covariance_, "integration_covariance", 1.0e-8);
 
-  gyro_noise_cov_ = toDiagCov(gyro_noise_sigmas);
-  accel_noise_cov_ = toDiagCov(accel_noise_sigmas);
-  accel_bias_rw_cov_ = toDiagCov(accel_bias_rw_sigmas);
-  gyro_bias_rw_cov_ = toDiagCov(gyro_bias_rw_sigmas);
+  gyro_noise_cov_ = to_diag_cov(gyro_noise_sigmas);
+  accel_noise_cov_ = to_diag_cov(accel_noise_sigmas);
+  accel_bias_rw_cov_ = to_diag_cov(accel_bias_rw_sigmas);
+  gyro_bias_rw_cov_ = to_diag_cov(gyro_bias_rw_sigmas);
 
   std::vector<double> velocity_noise_sigmas;
   double yaw_noise_sigma;
@@ -53,7 +53,7 @@ void BeliefStateCritic::initialize() {
   getParam(velocity_noise_sigmas, "velocity_noise_sigmas", std::vector<double>{0.02, 0.02, 0.02});
   getParam(yaw_noise_sigma, "yaw_noise_sigma", 0.01745);
 
-  dvl_noise_cov_ = toDiagCov(velocity_noise_sigmas);
+  dvl_noise_cov_ = to_diag_cov(velocity_noise_sigmas);
   ahrs_noise_cov_ = Eigen::Matrix<double, 1, 1>::Constant(std::pow(yaw_noise_sigma, 2));
 
   getParam(fg_odom_topic_, "fg_odom_topic", std::string("odometry/global"));
