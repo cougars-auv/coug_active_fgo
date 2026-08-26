@@ -23,9 +23,9 @@
 #include <string>
 #include <vector>
 
-#include "coug_active_fgo/waypoint_nav2_parameters.hpp"
+#include "coug_belief_mppi/waypoint_nav2_parameters.hpp"
 
-namespace coug_active_fgo {
+namespace coug_belief_mppi {
 
 class WaypointNav2Node : public rclcpp::Node {
  public:
@@ -49,4 +49,4 @@ class WaypointNav2Node : public rclcpp::Node {
   waypoint_nav2_node::Params params_;
 };
 
-}  // namespace coug_active_fgo
+}  // namespace coug_belief_mppi

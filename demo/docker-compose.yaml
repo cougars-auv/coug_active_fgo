@@ -17,8 +17,8 @@ services:
     build:
       context: ..
       dockerfile: demo/Dockerfile.demo
-    image: frostlab/cougars:active-fgo-demo
-    container_name: active-fgo-demo-ct
+    image: frostlab/cougars:belief-mppi-demo
+    container_name: belief-mppi-demo-ct
     environment:
       - DISPLAY=${DISPLAY}
       - LIBGL_ALWAYS_SOFTWARE=1
@@ -27,6 +27,6 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./demo_ros2_bag:/demo_ros2_bag:ro
     command: >
-      ros2 launch coug_active_fgo demo.launch.py
+      ros2 launch coug_belief_mppi demo.launch.py
       play_bag_path:=/demo_ros2_bag
       auv_ns:=blue1sim

@@ -21,9 +21,9 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/float64.hpp>
 
-#include "coug_active_fgo/belief_state_monitor_parameters.hpp"
+#include "coug_belief_mppi/belief_state_monitor_parameters.hpp"
 
-namespace coug_active_fgo {
+namespace coug_belief_mppi {
 class BeliefStateMonitorNode : public rclcpp::Node {
  public:
   explicit BeliefStateMonitorNode(const rclcpp::NodeOptions& options);
@@ -52,4 +52,4 @@ class BeliefStateMonitorNode : public rclcpp::Node {
   double last_trace_{-1.0};
 };
 
-}  // namespace coug_active_fgo
+}  // namespace coug_belief_mppi

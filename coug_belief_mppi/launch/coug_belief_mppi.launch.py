@@ -31,7 +31,7 @@ def generate_launch_description() -> LaunchDescription:
         [
             EnvironmentVariable("CONFIG_DIR"),
             "fleet",
-            "coug_active_fgo_params.yaml",
+            "coug_belief_mppi_params.yaml",
         ]
     )
     auv_params = PathJoinSubstitution(
@@ -76,7 +76,7 @@ def generate_launch_description() -> LaunchDescription:
                 description="Namespace for the AUV (e.g. auv0)",
             ),
             Node(
-                package="coug_active_fgo",
+                package="coug_belief_mppi",
                 executable="waypoint_nav2",
                 name="waypoint_nav2_node",
                 parameters=[
@@ -86,7 +86,7 @@ def generate_launch_description() -> LaunchDescription:
                 ],
             ),
             Node(
-                package="coug_active_fgo",
+                package="coug_belief_mppi",
                 executable="belief_state_monitor",
                 name="belief_state_monitor_node",
                 parameters=[

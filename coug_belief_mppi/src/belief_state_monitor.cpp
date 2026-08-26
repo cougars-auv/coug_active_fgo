@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "coug_active_fgo/belief_state_monitor.hpp"
+#include "coug_belief_mppi/belief_state_monitor.hpp"
 
 #include <rclcpp_components/register_node_macro.hpp>
 
-namespace coug_active_fgo {
+namespace coug_belief_mppi {
 
 BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& options)
     : Node("belief_state_monitor_node", options) {
@@ -100,6 +100,6 @@ void BeliefStateMonitorNode::publishTrace() {
   trace_pub_->publish(msg);
 }
 
-}  // namespace coug_active_fgo
+}  // namespace coug_belief_mppi
 
-RCLCPP_COMPONENTS_REGISTER_NODE(coug_active_fgo::BeliefStateMonitorNode)
+RCLCPP_COMPONENTS_REGISTER_NODE(coug_belief_mppi::BeliefStateMonitorNode)

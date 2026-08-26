@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "coug_active_fgo/belief_state_critic.hpp"
+#include "coug_belief_mppi/belief_state_critic.hpp"
 
 #include <omp.h>
 

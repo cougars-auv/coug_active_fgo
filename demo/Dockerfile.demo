@@ -20,18 +20,17 @@ SHELL [ "/bin/bash", "-c" ]
 
 ENV OVERLAY_WS=/ros2_ws
 
-COPY coug_active_fgo ${OVERLAY_WS}/src/coug_active_fgo
-COPY demo/demo.repos ${OVERLAY_WS}/src/demo.repos
+COPY . ${OVERLAY_WS}/src/repo
 
-# Import dependencies and build
+# Import demo dependencies and build
 WORKDIR ${OVERLAY_WS}
 RUN source /opt/ros/${ROS_DISTRO}/setup.sh && \
-  vcs import src < src/demo.repos
+  vcs import src < src/repo/demo/demo.repos
 
 RUN --mount=type=cache,target=${OVERLAY_WS}/build \
   --mount=type=cache,target=${OVERLAY_WS}/log \
   source /opt/ros/${ROS_DISTRO}/setup.sh && \
-  colcon build --packages-select coug_active_fgo coug_description --cmake-args -DCMAKE_BUILD_TYPE=Release
+  colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /root/.bashrc \
   && echo "[ -f ${OVERLAY_WS}/install/setup.bash ] && source ${OVERLAY_WS}/install/setup.bash" >> /root/.bashrc

@@ -1,5 +1,5 @@
 <class_libraries>
-  <library path="coug_active_fgo_critics">
+  <library path="coug_belief_mppi_critics">
     <class type="mppi::critics::BeliefStateCritic" base_class_type="mppi::critics::CriticFunction">
       <description></description>
     </class>

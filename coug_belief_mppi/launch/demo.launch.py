@@ -41,8 +41,8 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Acti
     play_bag_path_str = play_bag_path.perform(context)
     auv_ns_str = auv_ns.perform(context)
 
-    coug_active_fgo_dir = get_package_share_directory("coug_active_fgo")
-    coug_active_fgo_launch_dir = os.path.join(coug_active_fgo_dir, "launch")
+    coug_belief_mppi_dir = get_package_share_directory("coug_belief_mppi")
+    coug_belief_mppi_launch_dir = os.path.join(coug_belief_mppi_dir, "launch")
 
     actions = []
 
@@ -86,7 +86,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Acti
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(
-                    coug_active_fgo_launch_dir, "coug_active_fgo_viz.launch.py"
+                    coug_belief_mppi_launch_dir, "coug_belief_mppi_viz.launch.py"
                 )
             ),
             launch_arguments={

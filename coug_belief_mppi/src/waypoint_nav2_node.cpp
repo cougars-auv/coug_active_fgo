@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "coug_active_fgo/waypoint_nav2.hpp"
+#include "coug_belief_mppi/waypoint_nav2.hpp"
 
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<coug_active_fgo::WaypointNav2Node>(rclcpp::NodeOptions());
+  auto node = std::make_shared<coug_belief_mppi::WaypointNav2Node>(rclcpp::NodeOptions());
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;

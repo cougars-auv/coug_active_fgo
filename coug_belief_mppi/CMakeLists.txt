@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(coug_active_fgo)
+project(coug_belief_mppi)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
@@ -39,7 +39,7 @@ target_link_libraries(belief_state_monitor_component
 )
 
 rclcpp_components_register_nodes(belief_state_monitor_component
-  "coug_active_fgo::BeliefStateMonitorNode"
+  "coug_belief_mppi::BeliefStateMonitorNode"
 )
 
 ament_auto_add_library(waypoint_nav2_component SHARED NO_TARGET_LINK_LIBRARIES
@@ -53,7 +53,7 @@ target_link_libraries(waypoint_nav2_component
 )
 
 rclcpp_components_register_nodes(waypoint_nav2_component
-  "coug_active_fgo::WaypointNav2Node"
+  "coug_belief_mppi::WaypointNav2Node"
 )
 
 # --- Executables ---
@@ -72,13 +72,13 @@ target_link_libraries(waypoint_nav2
 )
 
 # --- Plugin Library ---
-ament_auto_add_library(coug_active_fgo_critics SHARED NO_TARGET_LINK_LIBRARIES
+ament_auto_add_library(coug_belief_mppi_critics SHARED NO_TARGET_LINK_LIBRARIES
   src/belief_state_critic.cpp
 )
 
-target_compile_features(coug_active_fgo_critics PUBLIC cxx_std_17)
+target_compile_features(coug_belief_mppi_critics PUBLIC cxx_std_17)
 
-target_link_libraries(coug_active_fgo_critics
+target_link_libraries(coug_belief_mppi_critics
   pluginlib::pluginlib
   OpenMP::OpenMP_CXX
 )

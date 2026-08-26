@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "coug_active_fgo/waypoint_nav2.hpp"
+#include "coug_belief_mppi/waypoint_nav2.hpp"
 
 #include <rclcpp_components/register_node_macro.hpp>
 
-namespace coug_active_fgo {
+namespace coug_belief_mppi {
 
 WaypointNav2Node::WaypointNav2Node(const rclcpp::NodeOptions& options)
     : Node("waypoint_nav2_node", options) {
@@ -86,6 +86,6 @@ void WaypointNav2Node::resultCallback(const GoalHandleFollowWaypoints::WrappedRe
   }
 }
 
-}  // namespace coug_active_fgo
+}  // namespace coug_belief_mppi
 
-RCLCPP_COMPONENTS_REGISTER_NODE(coug_active_fgo::WaypointNav2Node)
+RCLCPP_COMPONENTS_REGISTER_NODE(coug_belief_mppi::WaypointNav2Node)

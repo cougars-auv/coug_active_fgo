@@ -1,9 +1,9 @@
-# 🌊 CoUGARs Active Factor Graph Odometry
+# 🌊 CoUGARs Belief-Space MPPI
 
-[![ROS 2 Build & Test](https://github.com/cougars-auv/coug_active_fgo/actions/workflows/ros2_build_and_test.yml/badge.svg)](https://github.com/cougars-auv/coug_active_fgo/actions/workflows/ros2_build_and_test.yml)
-[![Docker Build](https://github.com/cougars-auv/coug_active_fgo/actions/workflows/docker_build.yml/badge.svg)](https://github.com/cougars-auv/coug_active_fgo/actions/workflows/docker_build.yml)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/cougars-auv/coug_active_fgo/main.svg)](https://results.pre-commit.ci/latest/github/cougars-auv/coug_active_fgo/main)
-[![codecov](https://codecov.io/gh/cougars-auv/coug_active_fgo/graph/badge.svg?token=92GLUNI35L)](https://codecov.io/gh/cougars-auv/coug_active_fgo)
+[![ROS 2 Build & Test](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/ros2_build_and_test.yml/badge.svg)](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/ros2_build_and_test.yml)
+[![Docker Build](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/docker_build.yml/badge.svg)](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/docker_build.yml)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/cougars-auv/coug_belief_mppi/main.svg)](https://results.pre-commit.ci/latest/github/cougars-auv/coug_belief_mppi/main)
+[![codecov](https://codecov.io/gh/cougars-auv/coug_belief_mppi/graph/badge.svg?token=92GLUNI35L)](https://codecov.io/gh/cougars-auv/coug_belief_mppi)
 
 <p align="left">
   <img src=".github/assets/rviz.gif" width="600">
@@ -15,17 +15,17 @@
 
 - Install [Docker](https://www.docker.com/get-started/).
 
-- Clone the `coug_active_fgo` repository.
+- Clone the `coug_belief_mppi` repository.
 
   ```bash
-  git clone https://github.com/cougars-auv/coug_active_fgo.git
+  git clone https://github.com/cougars-auv/coug_belief_mppi.git
   ```
 
 - Enable GUI forwarding, build the Docker image, and launch the demo container.
 
   ```bash
   xhost +local:docker
-  cd coug_active_fgo/demo && docker compose up
+  cd coug_belief_mppi/demo && docker compose up
   ```
 
 ## Results

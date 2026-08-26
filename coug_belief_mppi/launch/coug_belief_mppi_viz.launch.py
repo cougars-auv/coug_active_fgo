@@ -32,7 +32,7 @@ def visualization_setup(
     launch_rviz_str = LaunchConfiguration("launch_rviz").perform(context)
     launch_pj_str = LaunchConfiguration("launch_plotjuggler").perform(context)
 
-    pkg_share = get_package_share_directory("coug_active_fgo")
+    pkg_share = get_package_share_directory("coug_belief_mppi")
     nodes_to_launch = []
 
     if launch_rviz_str.lower() == "true":
