@@ -61,7 +61,6 @@ void BeliefStateCritic::initialize() {
   getParam(fg_bias_topic_, "fg_bias_topic", std::string("factor_graph_node/imu/bias"));
 
   auto node = parent_.lock();
-  clock_ = node->get_clock();
   fg_odom_sub_ = node->create_subscription<nav_msgs::msg::Odometry>(
       fg_odom_topic_, rclcpp::SystemDefaultsQoS(),
       std::bind(&BeliefStateCritic::fgOdomCallback, this, std::placeholders::_1));

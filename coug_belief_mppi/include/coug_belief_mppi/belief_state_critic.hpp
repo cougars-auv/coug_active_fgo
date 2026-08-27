@@ -61,7 +61,6 @@ class BeliefStateCritic : public CriticFunction {
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr fg_odom_sub_;
   rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fg_vel_sub_;
   rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fg_bias_sub_;
-  rclcpp::Clock::SharedPtr clock_;
 
   // --- State ---
   mutable std::mutex state_cov_mutex_;
