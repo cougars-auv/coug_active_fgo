@@ -35,7 +35,7 @@ WaypointNav2Node::WaypointNav2Node(const rclcpp::NodeOptions& options)
 
 void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
   if (msg->poses.empty()) {
-    RCLCPP_WARN(get_logger(), "Received empty waypoints. Canceling mission.");
+    RCLCPP_WARN(get_logger(), "Received empty waypoints. Canceling navigation.");
     nav2_client_->async_cancel_all_goals();
     return;
   }
@@ -71,13 +71,13 @@ void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::Sha
 void WaypointNav2Node::resultCallback(const GoalHandleFollowWaypoints::WrappedResult& result) {
   switch (result.code) {
     case rclcpp_action::ResultCode::SUCCEEDED:
-      RCLCPP_INFO(get_logger(), "Nav2 completed the mission.");
+      RCLCPP_INFO(get_logger(), "Nav2 completed the waypoint sequence.");
       break;
     case rclcpp_action::ResultCode::ABORTED:
-      RCLCPP_ERROR(get_logger(), "Nav2 aborted the mission.");
+      RCLCPP_ERROR(get_logger(), "Nav2 aborted the waypoint sequence.");
       break;
     case rclcpp_action::ResultCode::CANCELED:
-      RCLCPP_WARN(get_logger(), "Nav2 canceled the mission.");
+      RCLCPP_WARN(get_logger(), "Nav2 canceled the waypoint sequence.");
       break;
     default:
       RCLCPP_ERROR(get_logger(), "Unknown result code from Nav2.");
