@@ -30,6 +30,13 @@ class BeliefStateMonitorNode : public rclcpp::Node {
   explicit BeliefStateMonitorNode(const rclcpp::NodeOptions& options);
 
  private:
+  // --- Callbacks ---
+  void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+
+  void velCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
+
+  void biasCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
+
   // --- Helpers ---
   void publishTrace();
 

@@ -64,56 +64,64 @@ void BeliefStateCritic::initialize() {
   clock_ = node->get_clock();
   fg_odom_sub_ = node->create_subscription<nav_msgs::msg::Odometry>(
       fg_odom_topic_, rclcpp::SystemDefaultsQoS(),
-      [this](const nav_msgs::msg::Odometry::SharedPtr msg) {
-        // Pose of the base frame in the map frame
-        const auto& cov_msg = msg->pose.covariance;
-        Eigen::Matrix<double, 6, 6> pose_cov;
-        for (int i = 0; i < 3; ++i) {
-          for (int j = 0; j < 3; ++j) {
-            pose_cov(i, j) = cov_msg[(i + 3) * 6 + (j + 3)];
-            pose_cov(i + 3, j + 3) = cov_msg[i * 6 + j];
-            pose_cov(i, j + 3) = cov_msg[(i + 3) * 6 + j];
-            pose_cov(i + 3, j) = cov_msg[i * 6 + (j + 3)];
-          }
-        }
-        std::lock_guard<std::mutex> lock(state_cov_mutex_);
-        init_state_cov_.block<6, 6>(0, 0) = pose_cov;
-        received_odom_.store(true);
-      });
+      std::bind(&BeliefStateCritic::fgOdomCallback, this, std::placeholders::_1));
 
   fg_vel_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       fg_vel_topic_, rclcpp::SystemDefaultsQoS(),
-      [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
-        // Velocity of the target frame in the map frame
-        // For simplicity, we assume it's at the base frame here
-        const auto& cov_msg = msg->twist.covariance;
-        Eigen::Matrix3d vel_cov;
-        for (int i = 0; i < 3; ++i) {
-          for (int j = 0; j < 3; ++j) {
-            vel_cov(i, j) = cov_msg[i * 6 + j];
-          }
-        }
-        std::lock_guard<std::mutex> lock(state_cov_mutex_);
-        init_state_cov_.block<3, 3>(6, 6) = vel_cov;
-        received_vel_.store(true);
-      });
+      std::bind(&BeliefStateCritic::fgVelCallback, this, std::placeholders::_1));
 
   fg_bias_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       fg_bias_topic_, rclcpp::SystemDefaultsQoS(),
-      [this](const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
-        const auto& cov_msg = msg->twist.covariance;
-        Eigen::Matrix<double, 6, 6> bias_cov;
-        for (int i = 0; i < 6; ++i) {
-          for (int j = 0; j < 6; ++j) {
-            bias_cov(i, j) = cov_msg[i * 6 + j];
-          }
-        }
-        std::lock_guard<std::mutex> lock(state_cov_mutex_);
-        init_state_cov_.block<6, 6>(9, 9) = bias_cov;
-        received_bias_.store(true);
-      });
+      std::bind(&BeliefStateCritic::fgBiasCallback, this, std::placeholders::_1));
 
   RCLCPP_INFO(logger_, "Initialization complete.");
+}
+
+void BeliefStateCritic::fgOdomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+  // Pose of the base frame in the map frame
+  const auto& cov_msg = msg->pose.covariance;
+  Eigen::Matrix<double, 6, 6> pose_cov;
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      pose_cov(i, j) = cov_msg[(i + 3) * 6 + (j + 3)];
+      pose_cov(i + 3, j + 3) = cov_msg[i * 6 + j];
+      pose_cov(i, j + 3) = cov_msg[(i + 3) * 6 + j];
+      pose_cov(i + 3, j) = cov_msg[i * 6 + (j + 3)];
+    }
+  }
+  std::lock_guard<std::mutex> lock(state_cov_mutex_);
+  init_state_cov_.block<6, 6>(0, 0) = pose_cov;
+  received_odom_.store(true);
+}
+
+void BeliefStateCritic::fgVelCallback(
+    const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
+  // Velocity of the target frame in the map frame
+  // For simplicity, we assume it's at the base frame here
+  const auto& cov_msg = msg->twist.covariance;
+  Eigen::Matrix3d vel_cov;
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      vel_cov(i, j) = cov_msg[i * 6 + j];
+    }
+  }
+  std::lock_guard<std::mutex> lock(state_cov_mutex_);
+  init_state_cov_.block<3, 3>(6, 6) = vel_cov;
+  received_vel_.store(true);
+}
+
+void BeliefStateCritic::fgBiasCallback(
+    const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
+  const auto& cov_msg = msg->twist.covariance;
+  Eigen::Matrix<double, 6, 6> bias_cov;
+  for (int i = 0; i < 6; ++i) {
+    for (int j = 0; j < 6; ++j) {
+      bias_cov(i, j) = cov_msg[i * 6 + j];
+    }
+  }
+  std::lock_guard<std::mutex> lock(state_cov_mutex_);
+  init_state_cov_.block<6, 6>(9, 9) = bias_cov;
+  received_bias_.store(true);
 }
 
 void BeliefStateCritic::score(CriticData& data) {

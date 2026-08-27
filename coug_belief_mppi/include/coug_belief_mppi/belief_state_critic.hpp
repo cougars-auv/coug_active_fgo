@@ -34,6 +34,13 @@ class BeliefStateCritic : public CriticFunction {
   void score(CriticData& data) override;
 
  private:
+  // --- Callbacks ---
+  void fgOdomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+
+  void fgVelCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
+
+  void fgBiasCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
+
   // --- Parameters ---
   unsigned int power_{0};
   float weight_{0};
