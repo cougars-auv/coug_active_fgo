@@ -24,7 +24,6 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
       std::make_shared<belief_state_monitor_node::ParamListener>(get_node_parameters_interface());
   params_ = param_listener_->get_params();
 
-  // --- ROS Interfaces ---
   odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
       params_.fg_odom_topic, rclcpp::SystemDefaultsQoS(),
       [this](const nav_msgs::msg::Odometry::SharedPtr msg) {

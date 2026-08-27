@@ -24,7 +24,6 @@ WaypointNav2Node::WaypointNav2Node(const rclcpp::NodeOptions& options)
       std::make_shared<waypoint_nav2_node::ParamListener>(get_node_parameters_interface());
   params_ = param_listener_->get_params();
 
-  // --- ROS Interfaces ---
   waypoint_sub_ = create_subscription<geometry_msgs::msg::PoseArray>(
       params_.waypoint_topic, rclcpp::SystemDefaultsQoS(),
       std::bind(&WaypointNav2Node::waypointCallback, this, std::placeholders::_1));
