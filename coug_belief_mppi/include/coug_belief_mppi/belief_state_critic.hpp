@@ -41,6 +41,14 @@ class BeliefStateCritic : public CriticFunction {
 
   void fgBiasCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
 
+  // --- ROS Interfaces ---
+  std::string fg_odom_topic_;
+  std::string fg_vel_topic_;
+  std::string fg_bias_topic_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr fg_odom_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fg_vel_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fg_bias_sub_;
+
   // --- Parameters ---
   unsigned int power_{0};
   float weight_{0};
@@ -53,14 +61,6 @@ class BeliefStateCritic : public CriticFunction {
   Eigen::Matrix3d accel_bias_rw_cov_;
   Eigen::Matrix3d gyro_bias_rw_cov_;
   double integration_covariance_{0};
-
-  // --- ROS Interfaces ---
-  std::string fg_odom_topic_;
-  std::string fg_vel_topic_;
-  std::string fg_bias_topic_;
-  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr fg_odom_sub_;
-  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fg_vel_sub_;
-  rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr fg_bias_sub_;
 
   // --- State ---
   mutable std::mutex state_cov_mutex_;
