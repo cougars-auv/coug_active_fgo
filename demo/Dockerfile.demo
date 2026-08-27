@@ -22,7 +22,7 @@ ENV OVERLAY_WS=/ros2_ws
 
 COPY . ${OVERLAY_WS}/src/repo
 
-# Import demo dependencies and build
+# Import packages and build the ROS workspace
 WORKDIR ${OVERLAY_WS}
 RUN source /opt/ros/${ROS_DISTRO}/setup.sh && \
   vcs import src < src/repo/demo/demo.repos

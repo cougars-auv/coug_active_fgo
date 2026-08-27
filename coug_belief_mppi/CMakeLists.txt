@@ -10,13 +10,11 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# --- Dependencies ---
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
 find_package(OpenMP REQUIRED)
 
-# --- Parameters ---
 generate_parameter_library(
   belief_state_monitor_parameters
   "params/belief_state_monitor_params.yaml"
@@ -27,7 +25,6 @@ generate_parameter_library(
   "params/waypoint_nav2_params.yaml"
 )
 
-# --- Component Library ---
 ament_auto_add_library(belief_state_monitor_component SHARED NO_TARGET_LINK_LIBRARIES
   src/belief_state_monitor.cpp
 )
@@ -56,7 +53,6 @@ rclcpp_components_register_nodes(waypoint_nav2_component
   "coug_belief_mppi::WaypointNav2Node"
 )
 
-# --- Executables ---
 ament_auto_add_executable(belief_state_monitor NO_TARGET_LINK_LIBRARIES
   src/belief_state_monitor_node.cpp
 )
@@ -71,7 +67,6 @@ target_link_libraries(waypoint_nav2
   waypoint_nav2_component
 )
 
-# --- Plugin Library ---
 ament_auto_add_library(coug_belief_mppi_critics SHARED NO_TARGET_LINK_LIBRARIES
   src/belief_state_critic.cpp
 )
@@ -83,7 +78,6 @@ target_link_libraries(coug_belief_mppi_critics
   OpenMP::OpenMP_CXX
 )
 
-# --- Export ---
 pluginlib_export_plugin_description_file(nav2_mppi_controller critics.xml)
 
 ament_auto_package(
