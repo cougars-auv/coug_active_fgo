@@ -25,7 +25,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description() -> LaunchDescription:
     use_sim_time = LaunchConfiguration("use_sim_time")
-    auv_ns = LaunchConfiguration("auv_ns")
+    agent_ns = LaunchConfiguration("agent_ns")
 
     fleet_params = PathJoinSubstitution(
         [
@@ -34,23 +34,23 @@ def generate_launch_description() -> LaunchDescription:
             "coug_belief_mppi_params.yaml",
         ]
     )
-    auv_params = PathJoinSubstitution(
+    agent_params = PathJoinSubstitution(
         [
             EnvironmentVariable("CONFIG_DIR"),
-            PythonExpression(["'", auv_ns, "' + '_params.yaml'"]),
+            PythonExpression(["'", agent_ns, "' + '_params.yaml'"]),
         ]
     )
 
     odom_frame = PythonExpression(
-        ["'", auv_ns, "/odom' if '", auv_ns, "' != '' else 'odom'"]
+        ["'", agent_ns, "/odom' if '", agent_ns, "' != '' else 'odom'"]
     )
 
     base_link_frame = PythonExpression(
         [
             "'",
-            auv_ns,
+            agent_ns,
             "/base_link' if '",
-            auv_ns,
+            agent_ns,
             "' != '' else 'base_link'",
         ]
     )
@@ -71,9 +71,9 @@ def generate_launch_description() -> LaunchDescription:
                 description="Use simulation/rosbag clock if true",
             ),
             DeclareLaunchArgument(
-                "auv_ns",
+                "agent_ns",
                 default_value="auv0",
-                description="Namespace for the AUV (e.g. auv0)",
+                description="Namespace for the agent (e.g. auv0)",
             ),
             Node(
                 package="coug_belief_mppi",
@@ -81,7 +81,7 @@ def generate_launch_description() -> LaunchDescription:
                 name="waypoint_nav2_node",
                 parameters=[
                     fleet_params,
-                    auv_params,
+                    agent_params,
                     {"use_sim_time": use_sim_time},
                 ],
             ),
@@ -91,7 +91,7 @@ def generate_launch_description() -> LaunchDescription:
                 name="belief_state_monitor_node",
                 parameters=[
                     fleet_params,
-                    auv_params,
+                    agent_params,
                     {"use_sim_time": use_sim_time},
                 ],
             ),
@@ -99,20 +99,20 @@ def generate_launch_description() -> LaunchDescription:
                 package="twist_mux",
                 executable="twist_mux",
                 name="twist_mux",
-                parameters=[fleet_params, auv_params, {"use_sim_time": use_sim_time}],
+                parameters=[fleet_params, agent_params, {"use_sim_time": use_sim_time}],
             ),
             # --- Navigation2 Pipeline ---
             Node(
                 package="nav2_controller",
                 executable="controller_server",
                 name="controller_server",
-                parameters=[fleet_params, auv_params, {"use_sim_time": use_sim_time}],
+                parameters=[fleet_params, agent_params, {"use_sim_time": use_sim_time}],
             ),
             Node(
                 package="nav2_planner",
                 executable="planner_server",
                 name="planner_server",
-                parameters=[fleet_params, auv_params, {"use_sim_time": use_sim_time}],
+                parameters=[fleet_params, agent_params, {"use_sim_time": use_sim_time}],
             ),
             Node(
                 package="nav2_behaviors",
@@ -120,7 +120,7 @@ def generate_launch_description() -> LaunchDescription:
                 name="behavior_server",
                 parameters=[
                     fleet_params,
-                    auv_params,
+                    agent_params,
                     {
                         "use_sim_time": use_sim_time,
                         "global_frame": odom_frame,
@@ -134,7 +134,7 @@ def generate_launch_description() -> LaunchDescription:
                 name="bt_navigator",
                 parameters=[
                     fleet_params,
-                    auv_params,
+                    agent_params,
                     {
                         "use_sim_time": use_sim_time,
                         "global_frame": "map",
@@ -146,7 +146,7 @@ def generate_launch_description() -> LaunchDescription:
                 package="nav2_waypoint_follower",
                 executable="waypoint_follower",
                 name="waypoint_follower",
-                parameters=[fleet_params, auv_params, {"use_sim_time": use_sim_time}],
+                parameters=[fleet_params, agent_params, {"use_sim_time": use_sim_time}],
             ),
             Node(
                 package="nav2_lifecycle_manager",

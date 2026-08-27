@@ -34,12 +34,12 @@ from launch.substitutions import LaunchConfiguration
 def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Action]:
     use_sim_time = LaunchConfiguration("use_sim_time")
     start_delay = LaunchConfiguration("start_delay")
-    auv_ns = LaunchConfiguration("auv_ns")
+    agent_ns = LaunchConfiguration("agent_ns")
     play_bag_path = LaunchConfiguration("play_bag_path")
     playback_rate = LaunchConfiguration("playback_rate")
 
     play_bag_path_str = play_bag_path.perform(context)
-    auv_ns_str = auv_ns.perform(context)
+    agent_ns_str = agent_ns.perform(context)
 
     coug_belief_mppi_dir = get_package_share_directory("coug_belief_mppi")
     coug_belief_mppi_launch_dir = os.path.join(coug_belief_mppi_dir, "launch")
@@ -61,14 +61,14 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Acti
                 "--topics",
                 "/tf",
                 "/tf_static",
-                f"/{auv_ns_str}/robot_description",
-                f"/{auv_ns_str}/odometry/truth",
-                f"/{auv_ns_str}/odometry/global",
-                f"/{auv_ns_str}/smoothed_path",
-                f"/{auv_ns_str}/waypoints_map",
-                f"/{auv_ns_str}/belief_state_monitor_node/norm_trace",
-                f"/{auv_ns_str}/factor_graph_node/velocity",
-                f"/{auv_ns_str}/factor_graph_node/imu/bias",
+                f"/{agent_ns_str}/robot_description",
+                f"/{agent_ns_str}/odometry/truth",
+                f"/{agent_ns_str}/odometry/global",
+                f"/{agent_ns_str}/smoothed_path",
+                f"/{agent_ns_str}/waypoints_map",
+                f"/{agent_ns_str}/belief_state_monitor_node/norm_trace",
+                f"/{agent_ns_str}/factor_graph_node/velocity",
+                f"/{agent_ns_str}/factor_graph_node/imu/bias",
             ],
         )
         actions.append(play_process)
@@ -91,7 +91,7 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Acti
             ),
             launch_arguments={
                 "use_sim_time": use_sim_time,
-                "auv_ns": auv_ns,
+                "agent_ns": agent_ns,
                 "launch_rviz": "true",
                 "launch_plotjuggler": "true",
             }.items(),
@@ -117,9 +117,9 @@ def generate_launch_description() -> LaunchDescription:
                 ),
             ),
             DeclareLaunchArgument(
-                "auv_ns",
+                "agent_ns",
                 default_value="auv0",
-                description="Namespace for the AUV (e.g. auv0)",
+                description="Namespace for the agent (e.g. auv0)",
             ),
             DeclareLaunchArgument(
                 "play_bag_path",

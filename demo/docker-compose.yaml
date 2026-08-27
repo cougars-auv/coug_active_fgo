@@ -29,4 +29,4 @@ services:
     command: >
       ros2 launch coug_belief_mppi demo.launch.py
       play_bag_path:=/demo_ros2_bag
-      auv_ns:=blue1sim
+      agent_ns:=blue1sim
