@@ -48,11 +48,9 @@ void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::Sha
 
   auto goal_msg = FollowWaypoints::Goal();
 
-  std::string frame_id = msg->header.frame_id.empty() ? "map" : msg->header.frame_id;
-
   for (const auto& pose : msg->poses) {
     geometry_msgs::msg::PoseStamped pose_stamped;
-    pose_stamped.header.frame_id = frame_id;
+    pose_stamped.header.frame_id = msg->header.frame_id;
     pose_stamped.header.stamp = get_clock()->now();
     pose_stamped.pose = pose;
 
