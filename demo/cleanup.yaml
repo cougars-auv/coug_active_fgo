@@ -8,7 +8,7 @@ output_bags:
       - /blue1sim/odometry/truth
       - /blue1sim/odometry/global
       - /blue1sim/smoothed_path
-      - /blue1sim/waypoints_map
+      - /blue1sim/waypoints_nav2
       - /blue1sim/belief_state_monitor_node/norm_trace
       - /blue1sim/factor_graph_node/velocity
       - /blue1sim/factor_graph_node/imu/bias
