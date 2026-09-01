@@ -60,6 +60,7 @@ class BeliefStateCritic : public CriticFunction {
   Eigen::Matrix3d accel_noise_cov_;
   Eigen::Matrix3d accel_bias_rw_cov_;
   Eigen::Matrix3d gyro_bias_rw_cov_;
+  Eigen::Vector3d gravity_;
   double integration_covariance_{0};
 
   // --- State ---

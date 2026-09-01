@@ -110,6 +110,7 @@ def generate_launch_description() -> LaunchDescription:
                     agent_param_file,
                     {"use_sim_time": use_sim_time},
                 ],
+                additional_env={"OMP_NUM_THREADS": "4"},
             ),
             Node(
                 package="nav2_planner",

@@ -32,6 +32,7 @@ void BeliefStateCritic::initialize() {
 
   std::vector<double> accel_noise_sigmas, gyro_noise_sigmas;
   std::vector<double> accel_bias_rw_sigmas, gyro_bias_rw_sigmas;
+  std::vector<double> gravity;
 
   getParam(accel_noise_sigmas, "accel_noise_sigmas", std::vector<double>{5.6e-4, 5.6e-4, 5.6e-4});
   getParam(gyro_noise_sigmas, "gyro_noise_sigmas", std::vector<double>{5.24e-5, 5.24e-5, 5.24e-5});
@@ -39,11 +40,13 @@ void BeliefStateCritic::initialize() {
            std::vector<double>{1.4e-5, 1.4e-5, 1.4e-5});
   getParam(gyro_bias_rw_sigmas, "gyro_bias_rw_sigmas", std::vector<double>{3.5e-6, 3.5e-6, 3.5e-6});
   getParam(integration_covariance_, "integration_covariance", 1.0e-8);
+  getParam(gravity, "gravity", std::vector<double>{0.0, 0.0, -9.8});
 
   gyro_noise_cov_ = to_diag_cov(gyro_noise_sigmas);
   accel_noise_cov_ = to_diag_cov(accel_noise_sigmas);
   accel_bias_rw_cov_ = to_diag_cov(accel_bias_rw_sigmas);
   gyro_bias_rw_cov_ = to_diag_cov(gyro_bias_rw_sigmas);
+  gravity_ = Eigen::Vector3d::Map(gravity.data());
 
   std::vector<double> velocity_noise_sigmas;
   double yaw_noise_sigma;
@@ -145,14 +148,20 @@ void BeliefStateCritic::score(CriticData& data) {
 
   const double dt_sq = dt * dt;
   Eigen::Matrix<double, 15, 15> process_noise_cov = Eigen::Matrix<double, 15, 15>::Zero();
-  process_noise_cov.block<3, 3>(0, 0) = gyro_noise_cov_ * dt;
   process_noise_cov.block<3, 3>(3, 3) = Eigen::Matrix3d::Identity() * integration_covariance_ * dt;
-  process_noise_cov.block<3, 3>(6, 6) = accel_noise_cov_ * dt;
   process_noise_cov.block<3, 3>(9, 9) = accel_bias_rw_cov_ * dt;
   process_noise_cov.block<3, 3>(12, 12) = gyro_bias_rw_cov_ * dt;
 
   const Eigen::Matrix<double, 15, 15> I_15x15 = Eigen::Matrix<double, 15, 15>::Identity();
   const Eigen::Matrix3d I_3x3 = Eigen::Matrix3d::Identity();
+
+  const auto skew = [](const Eigen::Vector3d& vector) {
+    Eigen::Matrix3d result;
+    result << 0.0, -vector.z(), vector.y(), vector.z(), 0.0, -vector.x(), -vector.y(), vector.x(),
+        0.0;
+    return result;
+  };
+
   Eigen::Matrix<double, 1, 15> J_ahrs_state = Eigen::Matrix<double, 1, 15>::Zero();
   J_ahrs_state(0, 2) = 1.0;
 
@@ -168,6 +177,8 @@ void BeliefStateCritic::score(CriticData& data) {
     double last_ahrs_time = 0.0;
     double curr_sim_time = 0.0;
 
+    Eigen::Vector3d map_a_base = Eigen::Vector3d::Zero();
+
     for (size_t step = 0; step < time_steps; ++step) {
       const double yaw = static_cast<double>(data.trajectories.yaws(batch_idx, step));
       const double cos_yaw = std::cos(yaw);
@@ -178,16 +189,16 @@ void BeliefStateCritic::score(CriticData& data) {
       Eigen::Matrix3d map_R_base;
       map_R_base << cos_yaw, -sin_yaw, 0, sin_yaw, cos_yaw, 0, 0, 0, 1;
 
-      // Estimate map-frame acceleration
-      Eigen::Vector3d map_a_base = Eigen::Vector3d::Zero();
+      // Estimate map-frame velocity and acceleration
+      const double base_vx = static_cast<double>(data.state.vx(batch_idx, step));
+      const double base_vy = static_cast<double>(data.state.vy(batch_idx, step));
+      const Eigen::Vector3d map_v_base(cos_yaw * base_vx - sin_yaw * base_vy,
+                                       sin_yaw * base_vx + cos_yaw * base_vy, 0.0);
+
       if (step + 1 < time_steps) {
         const double next_yaw = static_cast<double>(data.trajectories.yaws(batch_idx, step + 1));
-        const double base_vx = static_cast<double>(data.state.vx(batch_idx, step));
-        const double base_vy = static_cast<double>(data.state.vy(batch_idx, step));
         const double next_base_vx = static_cast<double>(data.state.vx(batch_idx, step + 1));
         const double next_base_vy = static_cast<double>(data.state.vy(batch_idx, step + 1));
-        const Eigen::Vector3d map_v_base(cos_yaw * base_vx - sin_yaw * base_vy,
-                                         sin_yaw * base_vx + cos_yaw * base_vy, 0.0);
         const Eigen::Vector3d next_map_v_base(
             std::cos(next_yaw) * next_base_vx - std::sin(next_yaw) * next_base_vy,
             std::sin(next_yaw) * next_base_vx + std::cos(next_yaw) * next_base_vy, 0.0);
@@ -198,13 +209,17 @@ void BeliefStateCritic::score(CriticData& data) {
       J_state_prev.block<3, 3>(3, 6) = I_3x3 * dt;                 // d(pos)/d(vel)
       J_state_prev.block<3, 3>(6, 9) = -map_R_base * dt;           // d(vel)/d(accel_bias)
       J_state_prev.block<3, 3>(3, 9) = -map_R_base * 0.5 * dt_sq;  // d(pos)/d(accel_bias)
-      J_state_prev.block<3, 3>(0, 12) = -I_3x3 * dt;               // d(orientation)/d(gyro_bias)
-      J_state_prev.block<3, 1>(6, 2) =                             // d(vel)/d(yaw)
-          (Eigen::Matrix3d() << -sin_yaw, -cos_yaw, 0, cos_yaw, -sin_yaw, 0, 0, 0, 0).finished() *
-          (map_R_base.transpose() * map_a_base) * dt;
+      J_state_prev.block<3, 3>(0, 12) = -map_R_base * dt;          // d(orientation)/d(gyro_bias)
+
+      const Eigen::Vector3d f_map = map_a_base - gravity_;
+      J_state_prev.block<3, 3>(6, 0) = -skew(f_map) * dt;  // d(vel)/d(attitude)
+      J_state_prev.block<3, 3>(3, 0) =                     // d(pos)/d(orientation)
+          J_state_prev.block<3, 3>(6, 0) * 0.5 * dt;
 
       // rollout_cov = J * rollout_cov * J^T + Q
       rollout_cov = J_state_prev * rollout_cov * J_state_prev.transpose() + process_noise_cov;
+      rollout_cov.block<3, 3>(0, 0) += map_R_base * gyro_noise_cov_ * map_R_base.transpose() * dt;
+      rollout_cov.block<3, 3>(6, 6) += map_R_base * accel_noise_cov_ * map_R_base.transpose() * dt;
 
       // --- UPDATE STEPS ---
       const bool trigger_dvl = (curr_sim_time - last_dvl_time) >= dvl_period;
@@ -212,9 +227,10 @@ void BeliefStateCritic::score(CriticData& data) {
 
       if (trigger_dvl) {
         // Maps map-frame velocity to base-frame DVL measurements
+        const Eigen::Matrix3d base_R_map = map_R_base.transpose();
         Eigen::Matrix<double, 3, 15> J_dvl_state = Eigen::Matrix<double, 3, 15>::Zero();
-        J_dvl_state.block<3, 3>(0, 6) << cos_yaw, sin_yaw, 0.0, -sin_yaw, cos_yaw, 0.0, 0.0, 0.0,
-            1.0;
+        J_dvl_state.block<3, 3>(0, 6) = base_R_map;                     // d(dvl)/d(vel)
+        J_dvl_state.block<3, 3>(0, 0) = base_R_map * skew(map_v_base);  // d(dvl)/d(attitude)
 
         // kalman_gain = rollout_cov * J^T * (J * rollout_cov * J^T + R)^-1
         const Eigen::Matrix<double, 15, 3> kalman_gain =
