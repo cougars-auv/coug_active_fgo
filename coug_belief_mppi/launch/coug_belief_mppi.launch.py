@@ -33,14 +33,14 @@ def generate_launch_description() -> LaunchDescription:
     use_sim_time = LaunchConfiguration("use_sim_time")
     agent_ns = LaunchConfiguration("agent_ns")
 
-    fleet_params = PathJoinSubstitution(
+    fleet_param_file = PathJoinSubstitution(
         [
             EnvironmentVariable("CONFIG_DIR"),
             "fleet",
             "coug_belief_mppi_params.yaml",
         ]
     )
-    agent_params = PathJoinSubstitution(
+    agent_param_file = PathJoinSubstitution(
         [
             EnvironmentVariable("CONFIG_DIR"),
             PythonExpression(["'", agent_ns, "' + '_params.yaml'"]),
@@ -75,8 +75,8 @@ def generate_launch_description() -> LaunchDescription:
                 executable="waypoint_nav2",
                 name="waypoint_nav2_node",
                 parameters=[
-                    fleet_params,
-                    agent_params,
+                    fleet_param_file,
+                    agent_param_file,
                     {"use_sim_time": use_sim_time},
                 ],
             ),
@@ -85,8 +85,8 @@ def generate_launch_description() -> LaunchDescription:
                 executable="belief_state_monitor",
                 name="belief_state_monitor_node",
                 parameters=[
-                    fleet_params,
-                    agent_params,
+                    fleet_param_file,
+                    agent_param_file,
                     {"use_sim_time": use_sim_time},
                 ],
             ),
@@ -94,28 +94,40 @@ def generate_launch_description() -> LaunchDescription:
                 package="twist_mux",
                 executable="twist_mux",
                 name="twist_mux",
-                parameters=[fleet_params, agent_params, {"use_sim_time": use_sim_time}],
+                parameters=[
+                    fleet_param_file,
+                    agent_param_file,
+                    {"use_sim_time": use_sim_time},
+                ],
             ),
             # --- Navigation2 Pipeline ---
             Node(
                 package="nav2_controller",
                 executable="controller_server",
                 name="controller_server",
-                parameters=[fleet_params, agent_params, {"use_sim_time": use_sim_time}],
+                parameters=[
+                    fleet_param_file,
+                    agent_param_file,
+                    {"use_sim_time": use_sim_time},
+                ],
             ),
             Node(
                 package="nav2_planner",
                 executable="planner_server",
                 name="planner_server",
-                parameters=[fleet_params, agent_params, {"use_sim_time": use_sim_time}],
+                parameters=[
+                    fleet_param_file,
+                    agent_param_file,
+                    {"use_sim_time": use_sim_time},
+                ],
             ),
             Node(
                 package="nav2_behaviors",
                 executable="behavior_server",
                 name="behavior_server",
                 parameters=[
-                    fleet_params,
-                    agent_params,
+                    fleet_param_file,
+                    agent_param_file,
                     {
                         "use_sim_time": use_sim_time,
                         "global_frame": odom_frame,
@@ -128,8 +140,8 @@ def generate_launch_description() -> LaunchDescription:
                 executable="bt_navigator",
                 name="bt_navigator",
                 parameters=[
-                    fleet_params,
-                    agent_params,
+                    fleet_param_file,
+                    agent_param_file,
                     {
                         "use_sim_time": use_sim_time,
                         "global_frame": "map",
@@ -141,7 +153,11 @@ def generate_launch_description() -> LaunchDescription:
                 package="nav2_waypoint_follower",
                 executable="waypoint_follower",
                 name="waypoint_follower",
-                parameters=[fleet_params, agent_params, {"use_sim_time": use_sim_time}],
+                parameters=[
+                    fleet_param_file,
+                    agent_param_file,
+                    {"use_sim_time": use_sim_time},
+                ],
             ),
             Node(
                 package="nav2_lifecycle_manager",

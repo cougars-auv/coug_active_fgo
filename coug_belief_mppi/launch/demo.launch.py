@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import tempfile
 from typing import Any
 
 from ament_index_python.packages import get_package_share_directory
@@ -21,14 +22,27 @@ from launch.action import Action
 from launch.actions import (
     DeclareLaunchArgument,
     ExecuteProcess,
-    IncludeLaunchDescription,
     LogInfo,
     OpaqueFunction,
     RegisterEventHandler,
 )
 from launch.event_handlers import OnProcessExit
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+
+
+def create_rviz_config(agent_ns: str) -> str:
+    template_path = os.path.join(
+        get_package_share_directory("coug_belief_mppi"), "config", "demo.rviz.template"
+    )
+    with open(template_path) as template:
+        content = template.read().replace("AGENT_NS", agent_ns)
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", delete=False, suffix=".rviz"
+    ) as rendered_config:
+        rendered_config.write(content)
+        return rendered_config.name
 
 
 def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Action]:
@@ -40,9 +54,6 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Acti
 
     play_bag_path_str = play_bag_path.perform(context)
     agent_ns_str = agent_ns.perform(context)
-
-    coug_belief_mppi_dir = get_package_share_directory("coug_belief_mppi")
-    coug_belief_mppi_launch_dir = os.path.join(coug_belief_mppi_dir, "launch")
 
     actions = []
 
@@ -83,18 +94,12 @@ def launch_setup(context: LaunchContext, *args: Any, **kwargs: Any) -> list[Acti
         )
 
     actions.append(
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(
-                    coug_belief_mppi_launch_dir, "coug_belief_mppi_viz.launch.py"
-                )
-            ),
-            launch_arguments={
-                "use_sim_time": use_sim_time,
-                "agent_ns": agent_ns,
-                "launch_rviz": "true",
-                "launch_plotjuggler": "true",
-            }.items(),
+        Node(
+            package="rviz2",
+            executable="rviz2",
+            name="rviz2",
+            arguments=["-d", create_rviz_config(agent_ns_str)],
+            parameters=[{"use_sim_time": use_sim_time}],
         )
     )
 
@@ -113,7 +118,8 @@ def generate_launch_description() -> LaunchDescription:
                 "start_delay",
                 default_value="0.0",
                 description=(
-                    "Time in seconds to skip from the beginning of the bag file (start offset)"
+                    "Time in seconds to skip from the beginning of the bag file "
+                    "(start offset)"
                 ),
             ),
             DeclareLaunchArgument(
@@ -129,7 +135,10 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "playback_rate",
                 default_value="1.0",
-                description="Bag playback rate multiplier (e.g. 0.5 for half speed, 2.0 for double)",
+                description=(
+                    "Bag playback rate multiplier "
+                    "(e.g. 0.5 for half speed, 2.0 for double)"
+                ),
             ),
             OpaqueFunction(function=launch_setup),
         ]
