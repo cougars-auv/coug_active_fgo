@@ -11,7 +11,7 @@
 
 ## Get Started
 
-> **Prerequisites:** 64-bit Linux, free disk space (5+ GB recommended).
+> **Prerequisites:** 64-bit Linux, 5+ GB of free disk space.
 
 - Install [Docker](https://www.docker.com/get-started/).
 
