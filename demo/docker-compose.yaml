@@ -14,12 +14,12 @@
 
 services:
   demo:
+    image: frostlab/cougars:belief-mppi-demo
     build:
       context: ..
       dockerfile: demo/Dockerfile.demo
       args:
         - VERSION=${VERSION:-latest}
-    image: frostlab/cougars:belief-mppi-demo
     container_name: cougars-belief-mppi-demo-ct
     environment:
       - DISPLAY=${DISPLAY}
