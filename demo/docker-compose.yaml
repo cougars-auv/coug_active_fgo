@@ -27,8 +27,8 @@ services:
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ./demo_ros2_bag:/demo_ros2_bag:ro
+      - ./demo_bag:/demo_bag:ro
     command: >
       ros2 launch coug_belief_mppi demo.launch.py
-      play_bag_path:=/demo_ros2_bag
+      play_bag_path:=/demo_bag
       agent_ns:=blue1sim

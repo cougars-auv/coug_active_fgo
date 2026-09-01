@@ -1,5 +1,5 @@
 output_bags:
-  - uri: demo_ros2_bag
+  - uri: demo_bag
     storage_id: mcap
     topics:
       - /tf
