@@ -52,7 +52,7 @@ To isolate and validate the performance of the BeliefStateCritic, I ran 6 missio
 
 <br>
 
-The demo demonstrates the BeliefStateCritic encouraging excitation-rich maneuvers, such as varying acceleration and yaw, as the AUV navigates to 3 waypoints using the MPPI controller.
+The demo demonstrates the BeliefStateCritic encouraging excitation-rich maneuvers as the AUV navigates to 3 waypoints using the MPPI controller.
 
 ### AI Use Disclosure
 
