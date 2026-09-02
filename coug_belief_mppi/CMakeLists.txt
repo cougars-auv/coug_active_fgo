@@ -82,7 +82,7 @@ pluginlib_export_plugin_description_file(nav2_mppi_controller critics.xml)
 
 ament_auto_package(
   INSTALL_TO_SHARE
-  launch
   config
+  launch
   USE_SCOPED_HEADER_INSTALL_DIR
 )
