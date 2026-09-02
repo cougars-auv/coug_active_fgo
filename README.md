@@ -88,7 +88,7 @@ This repository follows the **Semantic Versioning (SemVer 2.0.0)** standard:
 
 - **Update Package Version:** Before tagging, update the `<version>` in `package.xml`. For Python packages, also update the `version` in `setup.py`.
 
-- **Tag and Push:** Create and push a version tag (e.g., `v1.2.3`):
+- **Tag and Push:** Create and push the new version tag (e.g., `v1.2.3`):
 
   ```bash
   git tag v1.2.3
