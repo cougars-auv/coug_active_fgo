@@ -86,6 +86,8 @@ This repository follows the **Semantic Versioning (SemVer 2.0.0)** standard:
 > - **MINOR** version when you add functionality in a backward compatible manner
 > - **PATCH** version when you make backward compatible bug fixes
 
+- **Update Package Version:** Before tagging, update the `<version>` in `package.xml`. For Python packages, also update the `version` in `setup.py`.
+
 - **Tag and Push:** Create and push a version tag (e.g., `v1.2.3`):
 
   ```bash
