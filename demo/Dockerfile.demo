@@ -12,25 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG VERSION=latest
-FROM frostlab/cougars:runtime-${VERSION} AS demo
+FROM frostlab/cougars:runtime-latest AS demo
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-SHELL [ "/bin/bash", "-c" ]
-
 ENV OVERLAY_WS=/ros2_ws
+
+SHELL [ "/bin/bash", "-c" ]
 
 COPY . ${OVERLAY_WS}/src/repo
 
 # Import packages and build the ROS workspace
 WORKDIR ${OVERLAY_WS}
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+RUN source "/opt/ros/${ROS_DISTRO}/setup.bash" && \
   vcs import src < src/repo/demo/demo.repos
 
 RUN --mount=type=cache,target=${OVERLAY_WS}/build \
   --mount=type=cache,target=${OVERLAY_WS}/log \
-  source /opt/ros/${ROS_DISTRO}/setup.bash && \
+  source "/opt/ros/${ROS_DISTRO}/setup.bash" && \
   colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 
 ENTRYPOINT [ "/entrypoint.sh" ]
