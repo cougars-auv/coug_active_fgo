@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
 #include <atomic>
 #include <memory>
 #include <mutex>

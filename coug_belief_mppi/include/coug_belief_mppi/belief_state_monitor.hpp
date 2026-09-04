@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
 #include <geometry_msgs/msg/twist_with_covariance_stamped.hpp>
 #include <memory>
 #include <nav_msgs/msg/odometry.hpp>

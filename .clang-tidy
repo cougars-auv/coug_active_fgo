@@ -20,7 +20,7 @@ Checks: >
   -readability-magic-numbers
 
 CheckOptions:
-  misc-include-cleaner.IgnoreHeaders: 'Eigen/.*;Qt.*/.*'
+  misc-include-cleaner.IgnoreHeaders: 'Eigen/.*;Qt.*/.*;math.h'
 
 FormatStyle: file
 
