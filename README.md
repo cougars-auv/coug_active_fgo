@@ -1,7 +1,7 @@
 # 🌊 CoUGARs Belief-Space MPPI
 
 [![ROS 2 Build & Test](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/ros2_build_test.yaml/badge.svg)](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/ros2_build_test.yaml)
-[![Docker Build](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/docker_build.yml/badge.svg)](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/docker_build.yml)
+[![Docker Build](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/docker_build.yaml/badge.svg)](https://github.com/cougars-auv/coug_belief_mppi/actions/workflows/docker_build.yaml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/cougars-auv/coug_belief_mppi/main.svg)](https://results.pre-commit.ci/latest/github/cougars-auv/coug_belief_mppi/main)
 [![codecov](https://codecov.io/gh/cougars-auv/coug_belief_mppi/graph/badge.svg?token=92GLUNI35L)](https://codecov.io/gh/cougars-auv/coug_belief_mppi)
 

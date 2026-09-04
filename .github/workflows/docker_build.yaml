@@ -18,7 +18,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - ".github/workflows/docker_build.yml"
+      - ".github/workflows/docker_build.yaml"
       - "**/package.xml"
   workflow_dispatch:
 
