@@ -39,14 +39,14 @@ WaypointNav2Node::WaypointNav2Node(const rclcpp::NodeOptions& options)
 
   waypoint_sub_ = create_subscription<geometry_msgs::msg::PoseArray>(
       params_.waypoint_topic, rclcpp::SystemDefaultsQoS(),
-      [this](geometry_msgs::msg::PoseArray::SharedPtr msg) { waypointCallback(msg); });
+      [this](const geometry_msgs::msg::PoseArray::ConstSharedPtr& msg) { waypointCallback(msg); });
 
   nav2_client_ = rclcpp_action::create_client<FollowWaypoints>(this, "follow_waypoints");
 
   RCLCPP_INFO(get_logger(), "Initialization complete.");
 }
 
-void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::SharedPtr& msg) {
+void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::ConstSharedPtr& msg) {
   if (msg->poses.empty()) {
     RCLCPP_WARN(get_logger(), "Received empty waypoints. Canceling navigation.");
     nav2_client_->async_cancel_all_goals();

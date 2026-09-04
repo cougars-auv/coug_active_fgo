@@ -14,10 +14,9 @@
 
 #include "coug_belief_mppi/belief_state_critic.hpp"
 
-#include <Eigen/src/Core/Matrix.h>
-#include <math.h>
 #include <omp.h>
 
+#include <Eigen/Dense>
 #include <cmath>
 #include <cstddef>
 #include <functional>
@@ -80,24 +79,24 @@ void BeliefStateCritic::initialize() {
   auto node = parent_.lock();
   fg_odom_sub_ = node->create_subscription<nav_msgs::msg::Odometry>(
       fg_odom_topic_, rclcpp::SystemDefaultsQoS(),
-      [this](nav_msgs::msg::Odometry::SharedPtr msg) { fgOdomCallback(msg); });
+      [this](const nav_msgs::msg::Odometry::ConstSharedPtr& msg) { fgOdomCallback(msg); });
 
   fg_vel_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       fg_vel_topic_, rclcpp::SystemDefaultsQoS(),
-      [this](geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
+      [this](const geometry_msgs::msg::TwistWithCovarianceStamped::ConstSharedPtr& msg) {
         fgVelCallback(msg);
       });
 
   fg_bias_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       fg_bias_topic_, rclcpp::SystemDefaultsQoS(),
-      [this](geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
+      [this](const geometry_msgs::msg::TwistWithCovarianceStamped::ConstSharedPtr& msg) {
         fgBiasCallback(msg);
       });
 
   RCLCPP_INFO(logger_, "Initialization complete.");
 }
 
-void BeliefStateCritic::fgOdomCallback(const nav_msgs::msg::Odometry::SharedPtr& msg) {
+void BeliefStateCritic::fgOdomCallback(const nav_msgs::msg::Odometry::ConstSharedPtr& msg) {
   // Pose of the base frame in the map frame
   const auto& cov_msg = msg->pose.covariance;
   Eigen::Matrix<double, 6, 6> pose_cov;
@@ -115,7 +114,7 @@ void BeliefStateCritic::fgOdomCallback(const nav_msgs::msg::Odometry::SharedPtr&
 }
 
 void BeliefStateCritic::fgVelCallback(
-    const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr& msg) {
+    const geometry_msgs::msg::TwistWithCovarianceStamped::ConstSharedPtr& msg) {
   // Velocity of the target frame in the map frame
   // For simplicity, we assume it's at the base frame here
   const auto& cov_msg = msg->twist.covariance;
@@ -131,7 +130,7 @@ void BeliefStateCritic::fgVelCallback(
 }
 
 void BeliefStateCritic::fgBiasCallback(
-    const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr& msg) {
+    const geometry_msgs::msg::TwistWithCovarianceStamped::ConstSharedPtr& msg) {
   const auto& cov_msg = msg->twist.covariance;
   Eigen::Matrix<double, 6, 6> bias_cov;
   for (int i = 0; i < 6; ++i) {
