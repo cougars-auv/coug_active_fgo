@@ -277,7 +277,7 @@ void BeliefStateCritic::score(CriticData& data) {
     // Compute the normalized trace over the IMU bias covariance block
     const float norm_trace =
         static_cast<float>((init_bias_cov_inv * rollout_cov.block<6, 6>(9, 9)).trace());
-    data.costs(batch_idx) += std::pow(weight_ * norm_trace, power_);
+    data.costs(batch_idx) += static_cast<float>(std::pow(weight_ * norm_trace, power_));
   }
 }
 
