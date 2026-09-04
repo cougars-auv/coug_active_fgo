@@ -15,7 +15,6 @@
 #include "coug_belief_mppi/waypoint_nav2.hpp"
 
 #include <chrono>
-#include <functional>
 #include <memory>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>

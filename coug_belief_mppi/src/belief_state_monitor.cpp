@@ -15,7 +15,6 @@
 #include "coug_belief_mppi/belief_state_monitor.hpp"
 
 #include <Eigen/Dense>
-#include <functional>
 #include <memory>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
@@ -58,16 +57,13 @@ BeliefStateMonitorNode::BeliefStateMonitorNode(const rclcpp::NodeOptions& option
 }
 
 void BeliefStateMonitorNode::odomCallback(const nav_msgs::msg::Odometry::ConstSharedPtr& msg) {
-  const auto& cov_msg = msg->pose.covariance;
+  const Eigen::Map<const Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> cov_msg(
+      msg->pose.covariance.data());
   Eigen::Matrix<double, 6, 6> pose_cov;
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j) {
-      pose_cov(i, j) = cov_msg[(i + 3) * 6 + (j + 3)];
-      pose_cov(i + 3, j + 3) = cov_msg[i * 6 + j];
-      pose_cov(i, j + 3) = cov_msg[(i + 3) * 6 + j];
-      pose_cov(i + 3, j) = cov_msg[i * 6 + (j + 3)];
-    }
-  }
+  pose_cov.topLeftCorner<3, 3>() = cov_msg.bottomRightCorner<3, 3>();
+  pose_cov.bottomRightCorner<3, 3>() = cov_msg.topLeftCorner<3, 3>();
+  pose_cov.topRightCorner<3, 3>() = cov_msg.bottomLeftCorner<3, 3>();
+  pose_cov.bottomLeftCorner<3, 3>() = cov_msg.topRightCorner<3, 3>();
   state_cov_.block<6, 6>(0, 0) = pose_cov;
   received_odom_ = true;
   publishTrace();
@@ -75,13 +71,9 @@ void BeliefStateMonitorNode::odomCallback(const nav_msgs::msg::Odometry::ConstSh
 
 void BeliefStateMonitorNode::velCallback(
     const geometry_msgs::msg::TwistWithCovarianceStamped::ConstSharedPtr& msg) {
-  const auto& cov_msg = msg->twist.covariance;
-  Eigen::Matrix3d vel_cov;
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j) {
-      vel_cov(i, j) = cov_msg[i * 6 + j];
-    }
-  }
+  const Eigen::Map<const Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> cov_msg(
+      msg->twist.covariance.data());
+  const Eigen::Matrix3d vel_cov = cov_msg.topLeftCorner<3, 3>();
   state_cov_.block<3, 3>(6, 6) = vel_cov;
   received_vel_ = true;
   publishTrace();
@@ -89,13 +81,9 @@ void BeliefStateMonitorNode::velCallback(
 
 void BeliefStateMonitorNode::biasCallback(
     const geometry_msgs::msg::TwistWithCovarianceStamped::ConstSharedPtr& msg) {
-  const auto& cov_msg = msg->twist.covariance;
-  Eigen::Matrix<double, 6, 6> bias_cov;
-  for (int i = 0; i < 6; ++i) {
-    for (int j = 0; j < 6; ++j) {
-      bias_cov(i, j) = cov_msg[i * 6 + j];
-    }
-  }
+  const Eigen::Map<const Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> cov_msg(
+      msg->twist.covariance.data());
+  const Eigen::Matrix<double, 6, 6> bias_cov = cov_msg;
   state_cov_.block<6, 6>(9, 9) = bias_cov;
   received_bias_ = true;
   publishTrace();

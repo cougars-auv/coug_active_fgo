@@ -19,7 +19,6 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <cstddef>
-#include <functional>
 #include <mutex>
 #include <nav2_mppi_controller/critic_data.hpp>
 #include <nav2_mppi_controller/critic_function.hpp>
@@ -98,16 +97,13 @@ void BeliefStateCritic::initialize() {
 
 void BeliefStateCritic::fgOdomCallback(const nav_msgs::msg::Odometry::ConstSharedPtr& msg) {
   // Pose of the base frame in the map frame
-  const auto& cov_msg = msg->pose.covariance;
+  const Eigen::Map<const Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> cov_msg(
+      msg->pose.covariance.data());
   Eigen::Matrix<double, 6, 6> pose_cov;
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j) {
-      pose_cov(i, j) = cov_msg[(i + 3) * 6 + (j + 3)];
-      pose_cov(i + 3, j + 3) = cov_msg[i * 6 + j];
-      pose_cov(i, j + 3) = cov_msg[(i + 3) * 6 + j];
-      pose_cov(i + 3, j) = cov_msg[i * 6 + (j + 3)];
-    }
-  }
+  pose_cov.topLeftCorner<3, 3>() = cov_msg.bottomRightCorner<3, 3>();
+  pose_cov.bottomRightCorner<3, 3>() = cov_msg.topLeftCorner<3, 3>();
+  pose_cov.topRightCorner<3, 3>() = cov_msg.bottomLeftCorner<3, 3>();
+  pose_cov.bottomLeftCorner<3, 3>() = cov_msg.topRightCorner<3, 3>();
   std::lock_guard<std::mutex> const lock(state_cov_mutex_);
   init_state_cov_.block<6, 6>(0, 0) = pose_cov;
   received_odom_.store(true);
@@ -117,13 +113,9 @@ void BeliefStateCritic::fgVelCallback(
     const geometry_msgs::msg::TwistWithCovarianceStamped::ConstSharedPtr& msg) {
   // Velocity of the target frame in the map frame
   // For simplicity, we assume it's at the base frame here
-  const auto& cov_msg = msg->twist.covariance;
-  Eigen::Matrix3d vel_cov;
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j) {
-      vel_cov(i, j) = cov_msg[i * 6 + j];
-    }
-  }
+  const Eigen::Map<const Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> cov_msg(
+      msg->twist.covariance.data());
+  const Eigen::Matrix3d vel_cov = cov_msg.topLeftCorner<3, 3>();
   std::lock_guard<std::mutex> const lock(state_cov_mutex_);
   init_state_cov_.block<3, 3>(6, 6) = vel_cov;
   received_vel_.store(true);
@@ -131,13 +123,9 @@ void BeliefStateCritic::fgVelCallback(
 
 void BeliefStateCritic::fgBiasCallback(
     const geometry_msgs::msg::TwistWithCovarianceStamped::ConstSharedPtr& msg) {
-  const auto& cov_msg = msg->twist.covariance;
-  Eigen::Matrix<double, 6, 6> bias_cov;
-  for (int i = 0; i < 6; ++i) {
-    for (int j = 0; j < 6; ++j) {
-      bias_cov(i, j) = cov_msg[i * 6 + j];
-    }
-  }
+  const Eigen::Map<const Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> cov_msg(
+      msg->twist.covariance.data());
+  const Eigen::Matrix<double, 6, 6> bias_cov = cov_msg;
   std::lock_guard<std::mutex> const lock(state_cov_mutex_);
   init_state_cov_.block<6, 6>(9, 9) = bias_cov;
   received_bias_.store(true);
@@ -186,9 +174,7 @@ void BeliefStateCritic::score(CriticData& data) {
   const double ahrs_period = 1.0 / ahrs_update_rate_hz_;
 
   // Iterate through each rollout in the batch
-#pragma omp parallel for schedule(static) default(none) shared(                                  \
-        batch_size, time_steps, dt, dt_sq, data, init_cov, init_bias_cov_inv, process_noise_cov, \
-            I_15x15, I_3x3, skew, J_ahrs_state, dvl_period, ahrs_period, Eigen::Dynamic)
+#pragma omp parallel for schedule(static)
   for (size_t batch_idx = 0; batch_idx < batch_size; ++batch_idx) {
     Eigen::Matrix<double, 15, 15> rollout_cov = init_cov;
 
