@@ -186,7 +186,9 @@ void BeliefStateCritic::score(CriticData& data) {
   const double ahrs_period = 1.0 / ahrs_update_rate_hz_;
 
   // Iterate through each rollout in the batch
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) default(none) shared(                                  \
+        batch_size, time_steps, dt, dt_sq, data, init_cov, init_bias_cov_inv, process_noise_cov, \
+            I_15x15, I_3x3, skew, J_ahrs_state, dvl_period, ahrs_period, Eigen::Dynamic)
   for (size_t batch_idx = 0; batch_idx < batch_size; ++batch_idx) {
     Eigen::Matrix<double, 15, 15> rollout_cov = init_cov;
 
