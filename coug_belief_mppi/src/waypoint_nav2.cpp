@@ -14,7 +14,20 @@
 
 #include "coug_belief_mppi/waypoint_nav2.hpp"
 
+#include <chrono>
+#include <functional>
+#include <memory>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/node_options.hpp>
+#include <rclcpp_action/client.hpp>
+#include <rclcpp_action/client_goal_handle.hpp>
+#include <rclcpp_action/create_client.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
+
+#include "coug_belief_mppi/waypoint_nav2_parameters.hpp"
+#include "geometry_msgs/msg/pose_array.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
 
 namespace coug_belief_mppi {
 
@@ -26,14 +39,14 @@ WaypointNav2Node::WaypointNav2Node(const rclcpp::NodeOptions& options)
 
   waypoint_sub_ = create_subscription<geometry_msgs::msg::PoseArray>(
       params_.waypoint_topic, rclcpp::SystemDefaultsQoS(),
-      std::bind(&WaypointNav2Node::waypointCallback, this, std::placeholders::_1));
+      [this](geometry_msgs::msg::PoseArray::SharedPtr msg) { waypointCallback(msg); });
 
   nav2_client_ = rclcpp_action::create_client<FollowWaypoints>(this, "follow_waypoints");
 
   RCLCPP_INFO(get_logger(), "Initialization complete.");
 }
 
-void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::SharedPtr msg) {
+void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::SharedPtr& msg) {
   if (msg->poses.empty()) {
     RCLCPP_WARN(get_logger(), "Received empty waypoints. Canceling navigation.");
     nav2_client_->async_cancel_all_goals();
@@ -59,7 +72,7 @@ void WaypointNav2Node::waypointCallback(const geometry_msgs::msg::PoseArray::Sha
 
   auto send_goal_options = rclcpp_action::Client<FollowWaypoints>::SendGoalOptions();
   send_goal_options.result_callback =
-      std::bind(&WaypointNav2Node::resultCallback, this, std::placeholders::_1);
+      [this](const GoalHandleFollowWaypoints::WrappedResult& result) { resultCallback(result); };
 
   nav2_client_->async_send_goal(goal_msg, send_goal_options);
 

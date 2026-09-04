@@ -36,7 +36,7 @@ class WaypointNav2Node : public rclcpp::Node {
 
  private:
   // --- Callbacks ---
-  void waypointCallback(const geometry_msgs::msg::PoseArray::SharedPtr msg);
+  void waypointCallback(const geometry_msgs::msg::PoseArray::SharedPtr& msg);
 
   void resultCallback(const GoalHandleFollowWaypoints::WrappedResult& result);
 

@@ -35,11 +35,11 @@ class BeliefStateCritic : public CriticFunction {
 
  private:
   // --- Callbacks ---
-  void fgOdomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+  void fgOdomCallback(const nav_msgs::msg::Odometry::SharedPtr& msg);
 
-  void fgVelCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
+  void fgVelCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr& msg);
 
-  void fgBiasCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
+  void fgBiasCallback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr& msg);
 
   // --- ROS Interfaces ---
   std::string fg_odom_topic_;

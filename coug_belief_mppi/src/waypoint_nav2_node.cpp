@@ -12,9 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
+#include <rclcpp/executors.hpp>
+#include <rclcpp/utilities.hpp>
+
 #include "coug_belief_mppi/waypoint_nav2.hpp"
 
-int main(int argc, char* argv[]) {
+auto main(int argc, char* argv[]) -> int {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<coug_belief_mppi::WaypointNav2Node>(rclcpp::NodeOptions());
   rclcpp::spin(node);

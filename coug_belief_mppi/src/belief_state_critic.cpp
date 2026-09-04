@@ -14,9 +14,21 @@
 
 #include "coug_belief_mppi/belief_state_critic.hpp"
 
+#include <Eigen/src/Core/Matrix.h>
+#include <math.h>
 #include <omp.h>
 
 #include <cmath>
+#include <cstddef>
+#include <functional>
+#include <mutex>
+#include <nav2_mppi_controller/critic_data.hpp>
+#include <nav2_mppi_controller/critic_function.hpp>
+#include <rclcpp/logging.hpp>
+#include <vector>
+
+#include "geometry_msgs/msg/twist_with_covariance_stamped.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 
 namespace mppi::critics {
 
@@ -30,8 +42,10 @@ void BeliefStateCritic::initialize() {
     return Eigen::Vector3d::Map(sigmas.data()).cwiseAbs2().asDiagonal();
   };
 
-  std::vector<double> accel_noise_sigmas, gyro_noise_sigmas;
-  std::vector<double> accel_bias_rw_sigmas, gyro_bias_rw_sigmas;
+  std::vector<double> accel_noise_sigmas;
+  std::vector<double> gyro_noise_sigmas;
+  std::vector<double> accel_bias_rw_sigmas;
+  std::vector<double> gyro_bias_rw_sigmas;
   std::vector<double> gravity;
 
   getParam(accel_noise_sigmas, "accel_noise_sigmas", std::vector<double>{5.6e-4, 5.6e-4, 5.6e-4});
@@ -49,7 +63,7 @@ void BeliefStateCritic::initialize() {
   gravity_ = Eigen::Vector3d::Map(gravity.data());
 
   std::vector<double> velocity_noise_sigmas;
-  double yaw_noise_sigma;
+  double yaw_noise_sigma = NAN;
 
   getParam(dvl_update_rate_hz_, "dvl_update_rate_hz", 10.0);
   getParam(ahrs_update_rate_hz_, "ahrs_update_rate_hz", 10.0);
@@ -66,20 +80,24 @@ void BeliefStateCritic::initialize() {
   auto node = parent_.lock();
   fg_odom_sub_ = node->create_subscription<nav_msgs::msg::Odometry>(
       fg_odom_topic_, rclcpp::SystemDefaultsQoS(),
-      std::bind(&BeliefStateCritic::fgOdomCallback, this, std::placeholders::_1));
+      [this](nav_msgs::msg::Odometry::SharedPtr msg) { fgOdomCallback(msg); });
 
   fg_vel_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       fg_vel_topic_, rclcpp::SystemDefaultsQoS(),
-      std::bind(&BeliefStateCritic::fgVelCallback, this, std::placeholders::_1));
+      [this](geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
+        fgVelCallback(msg);
+      });
 
   fg_bias_sub_ = node->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
       fg_bias_topic_, rclcpp::SystemDefaultsQoS(),
-      std::bind(&BeliefStateCritic::fgBiasCallback, this, std::placeholders::_1));
+      [this](geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
+        fgBiasCallback(msg);
+      });
 
   RCLCPP_INFO(logger_, "Initialization complete.");
 }
 
-void BeliefStateCritic::fgOdomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+void BeliefStateCritic::fgOdomCallback(const nav_msgs::msg::Odometry::SharedPtr& msg) {
   // Pose of the base frame in the map frame
   const auto& cov_msg = msg->pose.covariance;
   Eigen::Matrix<double, 6, 6> pose_cov;
@@ -91,13 +109,13 @@ void BeliefStateCritic::fgOdomCallback(const nav_msgs::msg::Odometry::SharedPtr 
       pose_cov(i + 3, j) = cov_msg[i * 6 + (j + 3)];
     }
   }
-  std::lock_guard<std::mutex> lock(state_cov_mutex_);
+  std::lock_guard<std::mutex> const lock(state_cov_mutex_);
   init_state_cov_.block<6, 6>(0, 0) = pose_cov;
   received_odom_.store(true);
 }
 
 void BeliefStateCritic::fgVelCallback(
-    const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
+    const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr& msg) {
   // Velocity of the target frame in the map frame
   // For simplicity, we assume it's at the base frame here
   const auto& cov_msg = msg->twist.covariance;
@@ -107,13 +125,13 @@ void BeliefStateCritic::fgVelCallback(
       vel_cov(i, j) = cov_msg[i * 6 + j];
     }
   }
-  std::lock_guard<std::mutex> lock(state_cov_mutex_);
+  std::lock_guard<std::mutex> const lock(state_cov_mutex_);
   init_state_cov_.block<3, 3>(6, 6) = vel_cov;
   received_vel_.store(true);
 }
 
 void BeliefStateCritic::fgBiasCallback(
-    const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg) {
+    const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr& msg) {
   const auto& cov_msg = msg->twist.covariance;
   Eigen::Matrix<double, 6, 6> bias_cov;
   for (int i = 0; i < 6; ++i) {
@@ -121,7 +139,7 @@ void BeliefStateCritic::fgBiasCallback(
       bias_cov(i, j) = cov_msg[i * 6 + j];
     }
   }
-  std::lock_guard<std::mutex> lock(state_cov_mutex_);
+  std::lock_guard<std::mutex> const lock(state_cov_mutex_);
   init_state_cov_.block<6, 6>(9, 9) = bias_cov;
   received_bias_.store(true);
 }
@@ -136,12 +154,12 @@ void BeliefStateCritic::score(CriticData& data) {
 
   const size_t batch_size = data.trajectories.x.shape(0);
   const size_t time_steps = data.trajectories.x.shape(1);
-  const double dt = static_cast<double>(data.model_dt);
+  const auto dt = static_cast<double>(data.model_dt);
 
   Eigen::Matrix<double, 15, 15> init_cov;
   Eigen::Matrix<double, 6, 6> init_bias_cov_inv;
   {
-    std::lock_guard<std::mutex> lock(state_cov_mutex_);
+    std::lock_guard<std::mutex> const lock(state_cov_mutex_);
     init_cov = init_state_cov_;
     init_bias_cov_inv = init_state_cov_.block<6, 6>(9, 9).inverse();
   }
@@ -180,7 +198,7 @@ void BeliefStateCritic::score(CriticData& data) {
     Eigen::Vector3d map_a_base = Eigen::Vector3d::Zero();
 
     for (size_t step = 0; step < time_steps; ++step) {
-      const double yaw = static_cast<double>(data.trajectories.yaws(batch_idx, step));
+      const auto yaw = static_cast<double>(data.trajectories.yaws(batch_idx, step));
       const double cos_yaw = std::cos(yaw);
       const double sin_yaw = std::sin(yaw);
       curr_sim_time += dt;
@@ -190,15 +208,15 @@ void BeliefStateCritic::score(CriticData& data) {
       map_R_base << cos_yaw, -sin_yaw, 0, sin_yaw, cos_yaw, 0, 0, 0, 1;
 
       // Estimate map-frame velocity and acceleration
-      const double base_vx = static_cast<double>(data.state.vx(batch_idx, step));
-      const double base_vy = static_cast<double>(data.state.vy(batch_idx, step));
+      const auto base_vx = static_cast<double>(data.state.vx(batch_idx, step));
+      const auto base_vy = static_cast<double>(data.state.vy(batch_idx, step));
       const Eigen::Vector3d map_v_base(cos_yaw * base_vx - sin_yaw * base_vy,
                                        sin_yaw * base_vx + cos_yaw * base_vy, 0.0);
 
       if (step + 1 < time_steps) {
-        const double next_yaw = static_cast<double>(data.trajectories.yaws(batch_idx, step + 1));
-        const double next_base_vx = static_cast<double>(data.state.vx(batch_idx, step + 1));
-        const double next_base_vy = static_cast<double>(data.state.vy(batch_idx, step + 1));
+        const auto next_yaw = static_cast<double>(data.trajectories.yaws(batch_idx, step + 1));
+        const auto next_base_vx = static_cast<double>(data.state.vx(batch_idx, step + 1));
+        const auto next_base_vy = static_cast<double>(data.state.vy(batch_idx, step + 1));
         const Eigen::Vector3d next_map_v_base(
             std::cos(next_yaw) * next_base_vx - std::sin(next_yaw) * next_base_vy,
             std::sin(next_yaw) * next_base_vx + std::cos(next_yaw) * next_base_vy, 0.0);
