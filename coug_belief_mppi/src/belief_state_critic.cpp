@@ -215,6 +215,10 @@ void BeliefStateCritic::score(CriticData& data) {
       J_state_prev.block<3, 3>(6, 0) = -skew(f_map) * dt;  // d(vel)/d(attitude)
       J_state_prev.block<3, 3>(3, 0) =                     // d(pos)/d(orientation)
           J_state_prev.block<3, 3>(6, 0) * 0.5 * dt;
+      J_state_prev.block<3, 3>(6, 12) =  // d(vel)/d(gyro_bias)
+          skew(f_map) * map_R_base * 0.5 * dt_sq;
+      J_state_prev.block<3, 3>(3, 12) =  // d(pos)/d(gyro_bias)
+          skew(f_map) * map_R_base * dt_sq * dt / 6.0;
 
       // rollout_cov = J * rollout_cov * J^T + Q
       rollout_cov = J_state_prev * rollout_cov * J_state_prev.transpose() + process_noise_cov;
