@@ -99,7 +99,7 @@ void BeliefStateMonitorNode::publishTrace() {
     init_cov_set_ = true;
   }
 
-  double const trace = (init_bias_cov_inv_ * state_cov_.block<6, 6>(9, 9)).trace();
+  const double trace = (init_bias_cov_inv_ * state_cov_.block<6, 6>(9, 9)).trace();
   if (trace == last_trace_) {
     return;
   }

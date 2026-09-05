@@ -61,7 +61,7 @@ void BeliefStateCritic::initialize() {
   gravity_ = Eigen::Vector3d::Map(gravity.data());
 
   std::vector<double> velocity_noise_sigmas;
-  double yaw_noise_sigma = NAN;
+  double yaw_noise_sigma = 0.0;
 
   getParam(dvl_update_rate_hz_, "dvl_update_rate_hz", 10.0);
   getParam(ahrs_update_rate_hz_, "ahrs_update_rate_hz", 10.0);
@@ -104,7 +104,7 @@ void BeliefStateCritic::fgOdomCallback(const nav_msgs::msg::Odometry::ConstShare
   pose_cov.bottomRightCorner<3, 3>() = cov_msg.topLeftCorner<3, 3>();
   pose_cov.topRightCorner<3, 3>() = cov_msg.bottomLeftCorner<3, 3>();
   pose_cov.bottomLeftCorner<3, 3>() = cov_msg.topRightCorner<3, 3>();
-  std::lock_guard<std::mutex> const lock(state_cov_mutex_);
+  const std::lock_guard<std::mutex> lock(state_cov_mutex_);
   init_state_cov_.block<6, 6>(0, 0) = pose_cov;
   received_odom_.store(true);
 }
@@ -116,7 +116,7 @@ void BeliefStateCritic::fgVelCallback(
   const Eigen::Map<const Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> cov_msg(
       msg->twist.covariance.data());
   const Eigen::Matrix3d vel_cov = cov_msg.topLeftCorner<3, 3>();
-  std::lock_guard<std::mutex> const lock(state_cov_mutex_);
+  const std::lock_guard<std::mutex> lock(state_cov_mutex_);
   init_state_cov_.block<3, 3>(6, 6) = vel_cov;
   received_vel_.store(true);
 }
@@ -126,7 +126,7 @@ void BeliefStateCritic::fgBiasCallback(
   const Eigen::Map<const Eigen::Matrix<double, 6, 6, Eigen::RowMajor>> cov_msg(
       msg->twist.covariance.data());
   const Eigen::Matrix<double, 6, 6> bias_cov = cov_msg;
-  std::lock_guard<std::mutex> const lock(state_cov_mutex_);
+  const std::lock_guard<std::mutex> lock(state_cov_mutex_);
   init_state_cov_.block<6, 6>(9, 9) = bias_cov;
   received_bias_.store(true);
 }
@@ -146,7 +146,7 @@ void BeliefStateCritic::score(CriticData& data) {
   Eigen::Matrix<double, 15, 15> init_cov;
   Eigen::Matrix<double, 6, 6> init_bias_cov_inv;
   {
-    std::lock_guard<std::mutex> const lock(state_cov_mutex_);
+    const std::lock_guard<std::mutex> lock(state_cov_mutex_);
     init_cov = init_state_cov_;
     init_bias_cov_inv = init_state_cov_.block<6, 6>(9, 9).inverse();
   }
