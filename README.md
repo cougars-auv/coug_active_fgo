@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/cougars-auv/coug_belief_mppi/graph/badge.svg?token=92GLUNI35L)](https://codecov.io/gh/cougars-auv/coug_belief_mppi)
 
 <p align="left">
-  <img src=".github/assets/rviz.gif" width="600" alt="RViz example">
+  <img src=".github/assets/rviz.gif" width="600" alt="RViz demonstration of belief-space MPPI control">
 </p>
 
 ## Get Started
@@ -43,7 +43,7 @@ To isolate and validate the performance of the BeliefStateCritic, I ran 6 missio
 <br>
 
 <p align="center">
-  <img src=".github/assets/norm_trace.png" width="400" alt="Plot of the belief-state covariance norm trace over time">
+  <img src=".github/assets/norm_trace.png" width="400" alt="Normalized IMU bias covariance trace with versus without the BeliefStateCritic">
 </p>
 
 <p align="center">
