@@ -173,8 +173,9 @@ void BeliefStateCritic::score(CriticData& data) {
   const double dvl_period = 1.0 / dvl_update_rate_hz_;
   const double ahrs_period = 1.0 / ahrs_update_rate_hz_;
 
-  // Iterate through each rollout in the batch
+// NOLINTNEXTLINE(openmp-use-default-none)
 #pragma omp parallel for schedule(static)
+  // Iterate through each rollout in the batch
   for (size_t batch_idx = 0; batch_idx < batch_size; ++batch_idx) {
     Eigen::Matrix<double, 15, 15> rollout_cov = init_cov;
 
