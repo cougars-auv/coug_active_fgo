@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/cougars-auv/coug_belief_mppi/graph/badge.svg?token=92GLUNI35L)](https://codecov.io/gh/cougars-auv/coug_belief_mppi)
 
 <p align="left">
-  <img src=".github/assets/rviz.gif" width="600">
+  <img src=".github/assets/rviz.gif" width="600" alt="RViz example">
 </p>
 
 ## Get Started
@@ -43,7 +43,7 @@ To isolate and validate the performance of the BeliefStateCritic, I ran 6 missio
 <br>
 
 <p align="center">
-  <img src=".github/assets/norm_trace.png" width="400">
+  <img src=".github/assets/norm_trace.png" width="400" alt="Plot of the belief-state covariance norm trace over time">
 </p>
 
 <p align="center">
@@ -61,14 +61,17 @@ Gemini 3.1 Pro was used as a collaborative partner for initial brainstorming, an
 ## Elevator Pitch
 
 ### Problem
+
 Effective underwater navigation requires balancing both progressing toward a goal and maintaining an accurate state estimate. For AUVs relying extensively on internal sensors (IMU, DVL, etc), excitation – changes in acceleration and velocity – can often improve state estimate accuracy. This conflicts with the goal-directed approach of many AUV path planners and controllers.
 
 Finding the optimal trajectory that balances goal achievement with state estimation accuracy is a POMDP. However, through extending our state vector to include the covariance matrix of our state estimate, we can transform the problem into an observable belief-state MDP. This is a common strategy in Active SLAM, but results in a high degree of dimensionality. Calculating an exact closed-loop solution across all those continuous dimensions raises some serious computational challenges, especially in real-time on limited AUV hardware.
 
 ### Proposed Solution Approach
-To solve this continuous-time MDP in real-time, I plan to implement an open-loop Model Predictive Path Integral (MPPI) controller, which is the continuous-time version of the Multiforecast Model Predictive Control (MMPC) approach described in section 9.9.3 of the textbook. During each planning cycle, the MPPI algorithm will sample a large number of stochastic trajectory rollouts, evaluate them against a heuristic that penalizes both deviation from the goal and the trace of the covariance matrix, and execute the first step of the averaged optimal control sequence. 
+
+To solve this continuous-time MDP in real-time, I plan to implement an open-loop Model Predictive Path Integral (MPPI) controller, which is the continuous-time version of the Multiforecast Model Predictive Control (MMPC) approach described in section 9.9.3 of the textbook. During each planning cycle, the MPPI algorithm will sample a large number of stochastic trajectory rollouts, evaluate them against a heuristic that penalizes both deviation from the goal and the trace of the covariance matrix, and execute the first step of the averaged optimal control sequence.
 
 To simplify the scope of the project, I will make use of the HoloOcean simulator and Nav2’s CPU-optimized “nav2_mppi_controller” class available in ROS 2. Specifically, I plan to:
+
 1) Integrate Nav2’s “nav2_mppi_controller” with the HoloOcean simulator
 2) Implement a new AUV dynamics plugin (based on a simplified Fossen model) to accurately model physical state propagation during rollouts
 3) Implement a new heuristic plugin to simulate uncertainty propagation and penalize trajectories based on the trace of the resulting covariance matrix, forcing the the controller to favor excitation-rich action sequences
@@ -82,6 +85,7 @@ We **strongly recommend** using the [`cougars-dev`](https://github.com/cougars-a
 
 This repository follows the **Semantic Versioning (SemVer 2.0.0)** standard:
 > Given a version number **`MAJOR.MINOR.PATCH`**, increment the:
+>
 > - **MAJOR** version when you make incompatible API changes
 > - **MINOR** version when you add functionality in a backward compatible manner
 > - **PATCH** version when you make backward compatible bug fixes
@@ -102,6 +106,7 @@ This repository follows the **Semantic Versioning (SemVer 2.0.0)** standard:
 If you use this repository in your research, please cite the following publications:
 
 ### CoUGARs
+
 ```bibtex
 @misc{durrant2025lowcostmultiagentfleetacoustic,
   title={Low-cost Multi-agent Fleet for Acoustic Cooperative Localization Research},
